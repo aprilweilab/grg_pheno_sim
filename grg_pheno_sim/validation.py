@@ -2,13 +2,15 @@
 This file contains some validity checks for datatypes.
 =======
 """
+
 import numbers
 import operator
 import pandas as pd
 
+
 def check_type(input, id, data_type):
     """
-    This function checks if the input named `id` is of the required instance 
+    This function checks if the input named `id` is of the required instance
     `data_type` and raises a type error with an associated message if not.
 
     """
@@ -16,7 +18,8 @@ def check_type(input, id, data_type):
         return input
     else:
         raise TypeError(f"{id} must be a {data_type} instance")
-    
+
+
 def check_val(input, id, minimum=None, inclusive=False):
     """
     This function checks that the input is numerical and greater than the minimum.
@@ -29,6 +32,7 @@ def check_val(input, id, minimum=None, inclusive=False):
     elif minimum is not None and inclusive and val < minimum:
         raise ValueError(f"{id} must be a number not less than {minimum}")
     return val
+
 
 def check_int(input, id, minimum=None):
     """
@@ -44,6 +48,7 @@ def check_int(input, id, minimum=None):
         ) from None
     return input
 
+
 def check_pd_df(dataframe, df_id):
     """
     This function checks whether `dataframe` is a pandas dataframe or not.
@@ -52,4 +57,3 @@ def check_pd_df(dataframe, df_id):
     df = check_type(dataframe, df_id, pd.DataFrame)
 
     return df
-    

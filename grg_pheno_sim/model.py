@@ -2,10 +2,12 @@
 This file defines the distribution models used for causal mutation simulation. 
 =======
 """
+
 from abc import ABCMeta, abstractmethod
 import numpy as np
 
 from grg_pheno_sim.validation import check_type, check_int
+
 
 class GRGCausalMutationModel(metaclass=ABCMeta):
     """
@@ -78,6 +80,7 @@ class GRGCausalMutationModel(metaclass=ABCMeta):
         """
         pass
 
+
 class GRGCausalMutationModelNormal(GRGCausalMutationModel):
     """
     Normal distribution Causal Mutation model.
@@ -124,7 +127,8 @@ class GRGCausalMutationModelNormal(GRGCausalMutationModel):
             size=num_causal,
         )
         return beta
-    
+
+
 class GRGCausalMutationModelExponential(GRGCausalMutationModel):
     """
     Exponential distribution Causal Mutation model.
@@ -172,6 +176,7 @@ class GRGCausalMutationModelExponential(GRGCausalMutationModel):
             beta = beta * rng.choice([-1, 1], size=num_causal)
         return beta
 
+
 class GRGCausalMutationModelFixed(GRGCausalMutationModel):
     """
     Fixed value Causal Mutation model.
@@ -218,6 +223,7 @@ class GRGCausalMutationModelFixed(GRGCausalMutationModel):
         if self.random_sign:
             beta = np.multiply(rng.choice([-1, 1], size=num_causal), beta)
         return beta
+
 
 class GRGCausalMutationModelGamma(GRGCausalMutationModel):
     """
@@ -269,6 +275,7 @@ class GRGCausalMutationModelGamma(GRGCausalMutationModel):
             beta = np.multiply(rng.choice([-1, 1], size=num_causal), beta)
         return beta
 
+
 class GRGCausalMutationModelT(GRGCausalMutationModel):
     """
     Student's t distribution Causal Mutation model.
@@ -314,7 +321,8 @@ class GRGCausalMutationModelT(GRGCausalMutationModel):
         beta = rng.standard_t(self.df, size=num_causal)
         beta = beta * np.sqrt(self.var) + self.mean
         return beta
-    
+
+
 class GRGCausalMutationModelMultivariateNormal(GRGCausalMutationModel):
     """
     Multivariate normal distribution Causal Mutation model.
@@ -331,6 +339,7 @@ class GRGCausalMutationModelMultivariateNormal(GRGCausalMutationModel):
     GRGCausalMutationModel
         Multivariate normal distribution Causal Mutation model.
     """
+
     def __init__(self, mean, cov):
         super().__init__("multivariate normal", num_trait=len(mean))
         self.mean = mean
@@ -353,12 +362,11 @@ class GRGCausalMutationModelMultivariateNormal(GRGCausalMutationModel):
             Simulated effect size of a causal mutation.
         """
 
-
         num_causal = self.check_parameter(num_causal, rng)
         beta = rng.multivariate_normal(self.mean, self.cov, size=num_causal)
         return beta
 
-    
+
 class GRGCausalMutationModelMultivariateExponential(GRGCausalMutationModel):
     """
     Multivariate exponential distribution Causal Mutation model.
@@ -378,17 +386,21 @@ class GRGCausalMutationModelMultivariateExponential(GRGCausalMutationModel):
     GRGCausalMutationModel
         Multivariate exponential distribution Causal Mutation model.
     """
+
     def __init__(self, scales, random_sign=False):
         super().__init__("multivariate exponential", num_trait=len(scales))
         self.scales = np.array(scales)
         self.random_sign = random_sign
 
     def sim_effect_size(self, num_causal, rng):
-        beta = np.array([rng.exponential(scale=scale, size=num_causal) for scale in self.scales]).T
+        beta = np.array(
+            [rng.exponential(scale=scale, size=num_causal) for scale in self.scales]
+        ).T
         if self.random_sign:
             signs = rng.choice([-1, 1], size=(num_causal, len(self.scales)))
             beta *= signs
         return beta
+
 
 class GRGCausalMutationModelMultivariateFixed(GRGCausalMutationModel):
     """
@@ -408,6 +420,7 @@ class GRGCausalMutationModelMultivariateFixed(GRGCausalMutationModel):
     GRGCausalMutationModel
         Multivariate fixed distribution Causal Mutation model.
     """
+
     def __init__(self, values, random_sign=False):
         super().__init__("multivariate fixed", num_trait=len(values))
         self.values = np.array(values)
@@ -419,6 +432,7 @@ class GRGCausalMutationModelMultivariateFixed(GRGCausalMutationModel):
             signs = rng.choice([-1, 1], size=(num_causal, len(self.values)))
             beta *= signs
         return beta
+
 
 class GRGCausalMutationModelMultivariateGamma(GRGCausalMutationModel):
     """
@@ -441,6 +455,7 @@ class GRGCausalMutationModelMultivariateGamma(GRGCausalMutationModel):
     GRGCausalMutationModel
         Multivariate gamma distribution Causal Mutation model.
     """
+
     def __init__(self, shapes, scales, random_sign=False):
         super().__init__("multivariate gamma", num_trait=len(shapes))
         self.shapes = np.array(shapes)
@@ -448,22 +463,30 @@ class GRGCausalMutationModelMultivariateGamma(GRGCausalMutationModel):
         self.random_sign = random_sign
 
     def sim_effect_size(self, num_causal, rng):
-        beta = np.array([rng.gamma(shape, scale, size=num_causal) for shape, scale in zip(self.shapes, self.scales)]).T
+        beta = np.array(
+            [
+                rng.gamma(shape, scale, size=num_causal)
+                for shape, scale in zip(self.shapes, self.scales)
+            ]
+        ).T
         if self.random_sign:
             signs = rng.choice([-1, 1], size=(num_causal, len(self.scales)))
             beta *= signs
         return beta
 
-grg_causal_mutation_model_dict = {"normal":GRGCausalMutationModelNormal, 
-                        "exponential":GRGCausalMutationModelExponential,
-                        "fixed":GRGCausalMutationModelFixed,
-                        "gamma":GRGCausalMutationModelGamma,
-                        "t":GRGCausalMutationModelT,
-                        "multivariate normal":GRGCausalMutationModelMultivariateNormal,
-                        "multivariate exponential":GRGCausalMutationModelMultivariateExponential,
-                        "multivariate fixed":GRGCausalMutationModelMultivariateFixed,
-                        "multivariate gamma":GRGCausalMutationModelMultivariateGamma,
-                        }
+
+grg_causal_mutation_model_dict = {
+    "normal": GRGCausalMutationModelNormal,
+    "exponential": GRGCausalMutationModelExponential,
+    "fixed": GRGCausalMutationModelFixed,
+    "gamma": GRGCausalMutationModelGamma,
+    "t": GRGCausalMutationModelT,
+    "multivariate normal": GRGCausalMutationModelMultivariateNormal,
+    "multivariate exponential": GRGCausalMutationModelMultivariateExponential,
+    "multivariate fixed": GRGCausalMutationModelMultivariateFixed,
+    "multivariate gamma": GRGCausalMutationModelMultivariateGamma,
+}
+
 
 def grg_causal_mutation_model(dist_type, **kwargs):
     """
@@ -514,7 +537,7 @@ def grg_causal_mutation_model(dist_type, **kwargs):
 
     >>> model = grg_causal_mutation_model("exponential", scale=1, random_sign=True)
 
-    Gamma distribution 
+    Gamma distribution
 
     >>> model = grg_causal_mutation_model("gamma", shape=1, scale=2)
 
