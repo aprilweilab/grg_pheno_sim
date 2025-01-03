@@ -5,7 +5,7 @@ This file defines the distribution models used for causal mutation simulation.
 from abc import ABCMeta, abstractmethod
 import numpy as np
 
-from grg_pheno_sim.validation import check_type, check_val, check_int
+from grg_pheno_sim.validation import check_type, check_int
 
 class GRGCausalMutationModel(metaclass=ABCMeta):
     """

@@ -3,9 +3,7 @@ This file normalizes the phenotypic data for the individuals. It includes functi
 for quantile normalization as well.
 =======
 """
-import numpy as np
 import pandas as pd
-import pygrgl
 from scipy.stats import norm
 
 def normalize_genetic_val(phenotype_df):

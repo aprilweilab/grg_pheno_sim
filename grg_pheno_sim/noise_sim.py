@@ -3,8 +3,6 @@ This file simulates the environmental noise for the individual genetic values.
 =======
 """
 import numpy as np
-import pandas as pd
-import pygrgl
 from grg_pheno_sim.split import split_phenotypes
 
 class GrgPhenotype:

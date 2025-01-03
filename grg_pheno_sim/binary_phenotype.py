@@ -3,13 +3,10 @@ This file simulates binary phenotypes on GRGs by using the usual simulation meth
 and then converting continuous phenotypes to binary phenotypes.
 =======
 """
-import numpy as np
 import pandas as pd
 import scipy.stats as stats
-import pygrgl
 
 from grg_pheno_sim.effect_size import sim_grg_causal_mutation, additive_effect_sizes, samples_to_individuals, normalize_genetic_values, convert_to_effect_output
-from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.normalization import normalize 
 from grg_pheno_sim.phenotype import convert_to_phen

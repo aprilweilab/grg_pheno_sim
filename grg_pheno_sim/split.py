@@ -2,9 +2,6 @@
 This file contains functions to split the phenotypic dataframes for multivariate simulation.
 =======
 """
-import numpy as np
-import pandas as pd
-import pygrgl
 
 def split_effect_sizes(effect_sizes_df, return_print=False, return_list=False):
   """
