@@ -4,3 +4,4 @@ __pycache__
 *.grg
 demos/*/*.phen
 demos/*/*.par
+*.egg-info
