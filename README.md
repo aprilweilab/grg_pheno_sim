@@ -7,7 +7,7 @@ The folder `grg_pheno_sim` contains all the primary source code for the simulato
 
 _Installing from pip_ 
 
-If you just want to use the tools offered by `grg_pheno_sim` then you can install via pip (from [PyPi]())
+If you just want to use the tools offered by `grg_pheno_sim` then you can install via pip (from [PyPi](http://pypi.org/project/grg_pheno_sim/))
 
 `pip install grg_pheno_sim`
 
