@@ -5,3 +5,7 @@ __pycache__
 demos/*/*.phen
 demos/*/*.par
 *.egg-info
+.ipynb_checkpoints
+*.swp
+build/
+dist/
