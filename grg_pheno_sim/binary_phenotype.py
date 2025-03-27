@@ -1,5 +1,5 @@
 """
-This file simulates binary phenotypes on GRGs by using the usual simulation methods 
+This file simulates binary phenotypes on GRGs by using the usual simulation methods
 and then converting continuous phenotypes to binary phenotypes.
 =======
 """
