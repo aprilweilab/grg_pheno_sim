@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 PACKAGE_NAME = "grg_pheno_sim"
-VERSION = "1.0"
+VERSION = "1.1"
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(THISDIR, "requirements.txt")) as f:
@@ -20,6 +20,11 @@ setup(
     url="https://aprilweilab.github.io/",
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
     install_requires=[
         requirements,

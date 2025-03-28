@@ -1,5 +1,5 @@
 """
-This file defines the distribution models used for causal mutation simulation. 
+This file defines the distribution models used for causal mutation simulation.
 =======
 """
 
