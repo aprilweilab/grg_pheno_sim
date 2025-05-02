@@ -15,18 +15,15 @@ from grg_pheno_sim.effect_size import (
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.normalization import normalize
 
+
 def phenotype_class_to_df(phenotypes):
     """This function performs extracts the dataframe and performs
     necessary modifications before returning it.
     """
     dataframe = phenotypes.get_df()
-    dataframe["individual_id"] = dataframe[
-        "individual_id"
-    ].astype(int)
-    dataframe["causal_mutation_id"] = dataframe[
-        "causal_mutation_id"
-    ].astype(int)
-    return dataframe 
+    dataframe["individual_id"] = dataframe["individual_id"].astype(int)
+    dataframe["causal_mutation_id"] = dataframe["causal_mutation_id"].astype(int)
+    return dataframe
 
 
 def convert_to_phen(phenotypes_df, path, include_header=False):
@@ -244,7 +241,7 @@ def sim_phenotypes_custom(
 
     if heritability is not None:
         phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
-        if normalize_phenotype: 
+        if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
             final_phenotypes = phenotype_class_to_df(phenotypes)
@@ -264,7 +261,7 @@ def sim_phenotypes_custom(
                 means=user_mean,
                 cov=user_cov,
             )
-        
+
         if normalize_phenotype:
             final_phenotypes = normalize(
                 phenotypes, normalize_genetic_values=normalize_genetic_values_after

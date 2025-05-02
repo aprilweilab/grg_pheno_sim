@@ -17,10 +17,7 @@ from grg_pheno_sim.effect_size import (
 )
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.normalization import normalize
-from grg_pheno_sim.phenotype import (
-    convert_to_phen, 
-    phenotype_class_to_df
-)
+from grg_pheno_sim.phenotype import convert_to_phen, phenotype_class_to_df
 
 
 def intermediate_genetic_vals(
@@ -149,7 +146,7 @@ def sim_phenotypes_multi_grg_ram(
         phenotypes = sim_env_noise(combined_genetic_df, h2=heritability)
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
-        else: 
+        else:
             final_phenotypes = phenotype_class_to_df(phenotypes)
 
     else:
