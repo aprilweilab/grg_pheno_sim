@@ -15,6 +15,19 @@ from grg_pheno_sim.effect_size import (
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.normalization import normalize
 
+def phenotype_class_to_df(phenotypes):
+    """This function performs extracts the dataframe and performs
+    necessary modifications before returning it.
+    """
+    dataframe = phenotypes.get_df()
+    dataframe["individual_id"] = dataframe[
+        "individual_id"
+    ].astype(int)
+    dataframe["causal_mutation_id"] = dataframe[
+        "causal_mutation_id"
+    ].astype(int)
+    return dataframe 
+
 
 def convert_to_phen(phenotypes_df, path, include_header=False):
     """
@@ -42,6 +55,7 @@ def sim_phenotypes(
     model,
     num_causal,
     random_seed,
+    normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
     noise_heritability=None,
     user_mean=None,
@@ -62,6 +76,7 @@ def sim_phenotypes(
     model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
     num_causal: Number of causal sites simulated.
     random_seed: The random seed used for causal mutation simulation.
+    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
     noise_heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
@@ -111,7 +126,10 @@ def sim_phenotypes(
 
     if noise_heritability is not None:
         phenotypes = sim_env_noise(individual_genetic_values, h2=noise_heritability)
-        final_phenotypes = normalize(phenotypes)
+        if normalize_phenotype:
+            final_phenotypes = normalize(phenotypes)
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     else:
         if check:
@@ -129,9 +147,12 @@ def sim_phenotypes(
                 cov=user_cov,
             )
 
-        final_phenotypes = normalize(
-            phenotypes, normalize_genetic_values=normalize_genetic_values_after
-        )
+        if normalize_phenotype:
+            final_phenotypes = normalize(
+                phenotypes, normalize_genetic_values=normalize_genetic_values_after
+            )
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     if standardized_output == True:
         convert_to_phen(final_phenotypes, path, include_header=header)
@@ -142,6 +163,7 @@ def sim_phenotypes(
 def sim_phenotypes_custom(
     grg,
     input_effects,
+    normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
     noise_heritability=None,
     user_mean=None,
@@ -162,6 +184,7 @@ def sim_phenotypes_custom(
     ----------
     grg: The GRG on which phenotypes will be simulated.
     input_effects: The custom effect sizes dataset.
+    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
     noise_heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
@@ -221,7 +244,10 @@ def sim_phenotypes_custom(
 
     if noise_heritability is not None:
         phenotypes = sim_env_noise(individual_genetic_values, h2=noise_heritability)
-        final_phenotypes = normalize(phenotypes)
+        if normalize_phenotype: 
+            final_phenotypes = normalize(phenotypes)
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     else:
         if check:
@@ -238,10 +264,13 @@ def sim_phenotypes_custom(
                 means=user_mean,
                 cov=user_cov,
             )
-
-        final_phenotypes = normalize(
-            phenotypes, normalize_genetic_values=normalize_genetic_values_after
-        )
+        
+        if normalize_phenotype:
+            final_phenotypes = normalize(
+                phenotypes, normalize_genetic_values=normalize_genetic_values_after
+            )
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     if standardized_output == True:
 

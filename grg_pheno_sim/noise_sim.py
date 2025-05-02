@@ -59,6 +59,9 @@ class GrgPhenotype:
                 new_h2 = (genetic_vars + noise_vars) / phenotype_vars
 
             return new_h2
+        
+    def get_df(self):
+        return self.phenotype_df
 
 
 class GrgEnvSimulator:
