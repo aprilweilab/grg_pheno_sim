@@ -57,7 +57,7 @@ def sim_phenotypes(
     random_seed,
     normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
-    noise_heritability=None,
+    heritability=None,
     user_mean=None,
     user_cov=None,
     normalize_genetic_values_after=False,
@@ -78,7 +78,7 @@ def sim_phenotypes(
     random_seed: The random seed used for causal mutation simulation.
     normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
+    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
     normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
     save_effect_output: This boolean parameter decides whether the effect sizes
@@ -124,8 +124,8 @@ def sim_phenotypes(
     if normalize_genetic_values_before_noise == True:
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
-    if noise_heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=noise_heritability)
+    if heritability is not None:
+        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -165,7 +165,7 @@ def sim_phenotypes_custom(
     input_effects,
     normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
-    noise_heritability=None,
+    heritability=None,
     user_mean=None,
     user_cov=None,
     normalize_genetic_values_after=False,
@@ -186,7 +186,7 @@ def sim_phenotypes_custom(
     input_effects: The custom effect sizes dataset.
     normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
+    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
     normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
     save_effect_output: This boolean parameter decides whether the effect sizes
@@ -242,8 +242,8 @@ def sim_phenotypes_custom(
     if normalize_genetic_values_before_noise == True:
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
-    if noise_heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=noise_heritability)
+    if heritability is not None:
+        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
         if normalize_phenotype: 
             final_phenotypes = normalize(phenotypes)
         else:

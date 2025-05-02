@@ -26,7 +26,7 @@ def sim_binary_phenotypes(
     population_prevalence,
     random_seed,
     normalize_genetic_values_before_noise=False,
-    noise_heritability=None,
+    heritability=None,
     user_mean=None,
     user_cov=None,
     normalize_genetic_values_after=False,
@@ -53,7 +53,7 @@ def sim_binary_phenotypes(
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic
     values prior to simulating environmental noise (True if yes). Depends on the
     user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise
+    heritability: Takes in the h2 features to simulate environmental noise
     (set to None if the user prefers user-defined noise) and 1 is the user wants
     zero noise.
     user_mean: Mean parameter used for simulating environmental
@@ -106,8 +106,8 @@ def sim_binary_phenotypes(
     if normalize_genetic_values_before_noise == True:
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
-    if noise_heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=noise_heritability)
+    if heritability is not None:
+        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
         final_phenotypes = normalize(phenotypes)
 
     else:
@@ -149,7 +149,7 @@ def sim_binary_phenotypes_custom(
     input_effects,
     population_prevalence,
     normalize_genetic_values_before_noise=False,
-    noise_heritability=None,
+    heritability=None,
     user_mean=None,
     user_cov=None,
     normalize_genetic_values_after=False,
@@ -175,7 +175,7 @@ def sim_binary_phenotypes_custom(
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic
     values prior to simulating environmental noise (True if yes). Depends on the
     user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise
+    heritability: Takes in the h2 features to simulate environmental noise
     (set to None if the user prefers user-defined noise) and 1 is the user wants
     zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental
@@ -236,8 +236,8 @@ def sim_binary_phenotypes_custom(
     if normalize_genetic_values_before_noise == True:
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
-    if noise_heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=noise_heritability)
+    if heritability is not None:
+        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
         final_phenotypes = normalize(phenotypes)
 
     else:
