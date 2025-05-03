@@ -77,7 +77,7 @@ def normalize(phenotypes, normalize_genetic_values=False):
     `phenotype`
     """
 
-    phenotype_df = phenotypes.phenotype_df
+    phenotype_df = phenotypes.get_df()
     h2 = phenotypes.h2
     user_noise = phenotypes.user_noise
 

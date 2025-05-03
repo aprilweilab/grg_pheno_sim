@@ -17,7 +17,7 @@ from grg_pheno_sim.effect_size import (
 )
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.normalization import normalize
-from grg_pheno_sim.phenotype import convert_to_phen
+from grg_pheno_sim.phenotype import convert_to_phen, phenotype_class_to_df
 
 
 def intermediate_genetic_vals(
@@ -58,9 +58,10 @@ def sim_phenotypes_multi_grg_ram(
     model,
     num_causal_per_file,
     random_seed,
+    normalize_phenotype,
     normalize_genetic_values_before_noise,
     population_prev,
-    noise_heritability,
+    heritability,
     user_mean,
     user_cov,
     normalize_genetic_values_after,
@@ -79,8 +80,9 @@ def sim_phenotypes_multi_grg_ram(
     model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
     num_causal_per_file: Number of causal sites simulated for each file (same for each GRG).
     random_seed: The random seed used for causal mutation simulation.
+    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
+    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
     normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
     save_effect_output: This boolean parameter decides whether the effect sizes
@@ -140,9 +142,12 @@ def sim_phenotypes_multi_grg_ram(
     causal_mutation_id = combined_genetic_df["causal_mutation_id"].unique()
     check = len(causal_mutation_id) == 1
 
-    if noise_heritability is not None:
-        phenotypes = sim_env_noise(combined_genetic_df, h2=noise_heritability)
-        final_phenotypes = normalize(phenotypes)
+    if heritability is not None:
+        phenotypes = sim_env_noise(combined_genetic_df, h2=heritability)
+        if normalize_phenotype:
+            final_phenotypes = normalize(phenotypes)
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     else:
         if check:
@@ -154,9 +159,12 @@ def sim_phenotypes_multi_grg_ram(
                 combined_genetic_df, user_defined=True, means=user_mean, cov=user_cov
             )
 
-        final_phenotypes = normalize(
-            phenotypes, normalize_genetic_values=normalize_genetic_values_after
-        )
+        if normalize_phenotype:
+            final_phenotypes = normalize(
+                phenotypes, normalize_genetic_values=normalize_genetic_values_after
+            )
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     if population_prev is not None:
         continuous_phen = final_phenotypes["phenotype"]
@@ -178,9 +186,10 @@ def sim_phenotypes_multi_grg_sequential(
     model,
     num_causal_per_file,
     random_seed,
+    normalize_phenotype,
     normalize_genetic_values_before_noise,
     population_prev,
-    noise_heritability,
+    heritability,
     user_mean,
     user_cov,
     normalize_genetic_values_after,
@@ -199,8 +208,9 @@ def sim_phenotypes_multi_grg_sequential(
     model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
     num_causal_per_file: Number of causal sites simulated for each file (same for each GRG).
     random_seed: The random seed used for causal mutation simulation.
+    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
+    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
     user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
     normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
     save_effect_output: This boolean parameter decides whether the effect sizes
@@ -257,9 +267,12 @@ def sim_phenotypes_multi_grg_sequential(
     causal_mutation_id = combined_genetic_df["causal_mutation_id"].unique()
     check = len(causal_mutation_id) == 1
 
-    if noise_heritability is not None:
-        phenotypes = sim_env_noise(combined_genetic_df, h2=noise_heritability)
-        final_phenotypes = normalize(phenotypes)
+    if heritability is not None:
+        phenotypes = sim_env_noise(combined_genetic_df, h2=heritability)
+        if normalize_phenotype:
+            final_phenotypes = normalize(phenotypes)
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     else:
         if check:
@@ -271,9 +284,12 @@ def sim_phenotypes_multi_grg_sequential(
                 combined_genetic_df, user_defined=True, means=user_mean, cov=user_cov
             )
 
-        final_phenotypes = normalize(
-            phenotypes, normalize_genetic_values=normalize_genetic_values_after
-        )
+        if normalize_phenotype:
+            final_phenotypes = normalize(
+                phenotypes, normalize_genetic_values=normalize_genetic_values_after
+            )
+        else:
+            final_phenotypes = phenotype_class_to_df(phenotypes)
 
     if population_prev is not None:
         continuous_phen = final_phenotypes["phenotype"]
@@ -295,9 +311,10 @@ def sim_phenotypes_multi_grg(
     model,
     num_causal_per_file,
     random_seed,
+    normalize_phenotype=False,
     load_all_ram=False,
     normalize_genetic_values_before_noise=False,
-    noise_heritability=None,
+    heritability=None,
     binary=False,
     population_prevalence=None,
     user_mean=None,
@@ -321,10 +338,11 @@ def sim_phenotypes_multi_grg(
         If False, process GRGs sequentially to reduce memory usage.
 
     Other parameters are similar to sim_phenotypes function:
+    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic
     values prior to simulating environmental noise (True if yes). Depends on the
     user's discretion. Set to False by default.
-    noise_heritability: Takes in the h2 features to simulate environmental noise
+    heritability: Takes in the h2 features to simulate environmental noise
     (set to None if the user prefers user-defined noise) and 1 is the user wants
     zero noise.
     user_mean: Mean parameter used for simulating environmental
@@ -370,9 +388,10 @@ def sim_phenotypes_multi_grg(
             model,
             num_causal_per_file,
             random_seed,
+            normalize_phenotype,
             normalize_genetic_values_before_noise,
             population_prev,
-            noise_heritability,
+            heritability,
             user_mean,
             user_cov,
             normalize_genetic_values_after,
@@ -389,9 +408,10 @@ def sim_phenotypes_multi_grg(
             model,
             num_causal_per_file,
             random_seed,
+            normalize_phenotype,
             normalize_genetic_values_before_noise,
             population_prev,
-            noise_heritability,
+            heritability,
             user_mean,
             user_cov,
             normalize_genetic_values_after,
