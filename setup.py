@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 PACKAGE_NAME = "grg_pheno_sim"
-VERSION = "1.1"
+VERSION = "1.2"
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(THISDIR, "requirements.txt")) as f:
