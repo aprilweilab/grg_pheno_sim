@@ -60,6 +60,9 @@ class GrgPhenotype:
 
             return new_h2
 
+    def get_df(self):
+        return self.phenotype_df
+
 
 class GrgEnvSimulator:
     """Simulator class to simulate environmental noise of individuals in the GRG based on genetic values and causal mutations.
