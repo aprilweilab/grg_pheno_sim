@@ -15,16 +15,17 @@ from grg_pheno_sim.effect_size import (
     convert_to_effect_output,
 )
 from grg_pheno_sim.noise_sim import sim_env_noise
+from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
 from grg_pheno_sim.phenotype import convert_to_phen
 
 
 def sim_binary_phenotypes(
     grg,
-    model,
-    num_causal,
     population_prevalence,
-    random_seed,
+    model=grg_causal_mutation_model("normal", mean=0, var=1),
+    num_causal=1000,
+    random_seed=42,
     normalize_genetic_values_before_noise=False,
     heritability=None,
     user_mean=None,

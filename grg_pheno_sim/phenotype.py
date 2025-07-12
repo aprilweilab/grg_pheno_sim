@@ -13,6 +13,7 @@ from grg_pheno_sim.effect_size import (
     convert_to_effect_output,
 )
 from grg_pheno_sim.noise_sim import sim_env_noise
+from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
 
 
@@ -49,9 +50,9 @@ def convert_to_phen(phenotypes_df, path, include_header=False):
 
 def sim_phenotypes(
     grg,
-    model,
-    num_causal,
-    random_seed,
+    model=grg_causal_mutation_model("normal", mean=0, var=1),
+    num_causal=1000,
+    random_seed=42,
     normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
     heritability=None,
@@ -71,8 +72,9 @@ def sim_phenotypes(
     ----------
     grg: The GRG on which phenotypes will be simulated.
     model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
-    num_causal: Number of causal sites simulated.
-    random_seed: The random seed used for causal mutation simulation.
+    Default model used is the standard Gaussian. 
+    num_causal: Number of causal sites simulated. Default value used is 1000.
+    random_seed: The random seed used for causal mutation simulation. Default values is 42.
     normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
     heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
