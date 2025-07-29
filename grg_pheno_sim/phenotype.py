@@ -4,6 +4,8 @@ This file simulates the phenotypes overall by combining the incremental stages o
 """
 
 import pandas as pd
+import numpy as np
+import pygrgl
 
 from grg_pheno_sim.effect_size import (
     sim_grg_causal_mutation,
@@ -15,6 +17,7 @@ from grg_pheno_sim.effect_size import (
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
+from grg_pheno_sim.effect_size import allele_frequencies
 
 
 def phenotype_class_to_df(phenotypes):
@@ -64,6 +67,7 @@ def sim_phenotypes(
     standardized_output=False,
     path=None,
     header=False,
+    standardized=False
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -90,10 +94,11 @@ def sim_phenotypes(
     Default value is None.
     header: This boolean parameter decides whether the .phen output file contains column
     headers or not. Default value is False.
+    standardized: This boolean parameters decides whether the simulation uses standardized genotypes.
 
     Returns
     --------------------
-    Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
+    Pandas dataframe with resultant phenotypes. The dataframe contains the following:
     `causal_mutation_id`
     `individual_id`
     `genetic_value`
@@ -101,8 +106,11 @@ def sim_phenotypes(
     `phenotype`
     """
 
+    if standardized is True:
+        return sim_phenotypes_standardized(grg, heritability, num_causal, random_seed)
+
     causal_mutation_df = sim_grg_causal_mutation(
-        grg, num_causal=num_causal, model=model, random_seed=random_seed
+        grg, heritability, num_causal=num_causal, model=model, random_seed=random_seed
     )
 
     print("The initial effect sizes are ")
@@ -201,7 +209,7 @@ def sim_phenotypes_custom(
 
     Returns
     --------------------
-    Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
+    Pandas dataframe with resultant phenotypes. The dataframe contains the following:
     `causal_mutation_id`
     `individual_id`
     `genetic_value`
@@ -274,5 +282,126 @@ def sim_phenotypes_custom(
     if standardized_output == True:
 
         convert_to_phen(final_phenotypes, path, include_header=header)
+
+    return final_phenotypes
+
+def sim_phenotypes_standardized(
+    grg,
+    heritability,
+    num_causal,
+    random_seed
+):
+    """
+    Function to simulate phenotypes using standardized genotype matrices.
+    
+    Based on the standardized approach where X = (X-U)Σ, and genetic values
+    are computed as Xβ = X(Σβ) - UΣβ.
+
+    Parameters
+    ----------
+    grg: The GRG on which phenotypes will be simulated.
+    heritability: The narrow sense heritability (h²).
+    num_causal: Number of causal mutations to be simulated.
+    random_seed: Random seed for reproducibility.
+
+    Returns
+    --------------------
+    Pandas dataframe with resultant phenotypes. The dataframe contains the following:
+    `causal_mutation_id`
+    `individual_id`
+    `genetic_value`
+    `environmental_noise`
+    `phenotype`
+    """
+
+    # Sample effect sizes from normal distribution with variance h²/M_causal
+    mean_1 = 0.0  
+    var_1 = (heritability * heritability) / num_causal
+    model_normal = grg_causal_mutation_model("normal", mean=mean_1, var=var_1)
+
+    # Simulate causal mutations and their effect sizes
+    causal_mutation_df = sim_grg_causal_mutation(
+        grg, model=model_normal, num_causal=num_causal, random_seed=random_seed
+    )
+
+    print("The initial effect sizes are ")
+    print(causal_mutation_df)
+
+    # Get causal mutation sites and their effect sizes
+    causal_sites = causal_mutation_df["mutation_id"].values
+    effect_sizes = causal_mutation_df["effect_size"].values
+    
+    # Calculate allele frequencies for causal sites
+    frequencies = allele_frequencies(grg, causal_mutation_df)
+    
+    # Create standardized effect size vector Σβ
+    # Σ is diagonal matrix with elements 1/σᵢ where σᵢ = √(2fᵢ(1-fᵢ))
+    # So Σβ has elements βᵢ/σᵢ at each causal site
+    num_mutations = grg.num_mutations
+    standardized_effect_vector = np.zeros(num_mutations, dtype=np.float64)
+    
+    for i, (site, beta, freq) in enumerate(zip(causal_sites, effect_sizes, frequencies)):
+        # Calculate standard deviation: σᵢ = √(2fᵢ(1-fᵢ))
+        sigma_i = np.sqrt(2 * freq * (1 - freq))
+        if sigma_i > 0:  # Avoid division by zero
+            standardized_effect_vector[site] = beta / sigma_i
+    
+    # Calculate X(Σβ) using dot product with DOWN direction
+    # This gives us the raw genetic values before allele frequency adjustment
+    raw_genetic_values = pygrgl.dot_product(
+        grg=grg, 
+        input=standardized_effect_vector, 
+        direction=pygrgl.TraversalDirection.DOWN
+    )
+    
+    # Calculate UΣβ (allele frequency adjustment term)
+    # U is N-by-M matrix where each entry in i-th column is 2fᵢ
+    # So UΣβ is N-by-1 vector filled with Σᵢ 2fᵢβᵢ/σᵢ
+    allele_freq_adjustment = 0.0
+    for i, (site, beta, freq) in enumerate(zip(causal_sites, effect_sizes, frequencies)):
+        sigma_i = np.sqrt(2 * freq * (1 - freq))
+        if sigma_i > 0:
+            allele_freq_adjustment += 2 * freq * beta / sigma_i
+    
+    # Get sample nodes and calculate final genetic values: Xβ = X(Σβ) - UΣβ
+    samples_list = grg.get_sample_nodes()
+    final_genetic_values = []
+    
+    for node in samples_list:
+        genetic_value = raw_genetic_values[node] - allele_freq_adjustment
+        final_genetic_values.append(genetic_value)
+    
+    # Create DataFrame with sample-level genetic values
+    sample_effects_df = pd.DataFrame({
+        "sample_node_id": samples_list,
+        "genetic_value": final_genetic_values,
+        "causal_mutation_id": 0
+    })
+    
+    # Convert sample-level genetic values to individual-level
+    individual_genetic_values = samples_to_individuals(sample_effects_df)
+
+    print("The genetic values of the individuals are ")
+    print(individual_genetic_values)
+
+    # Calculate variance of genetic values for environmental noise simulation
+    # Environmental noise: ε ~ N(0, Var(Xβ)(1/h² - 1))
+    genetic_var = individual_genetic_values["genetic_value"].var()
+    noise_var = genetic_var * (1/heritability - 1)
+    
+    # Simulate environmental noise
+    rng = np.random.default_rng(random_seed)
+    num_individuals = len(individual_genetic_values)
+    environmental_noise = rng.normal(0, np.sqrt(noise_var), size=num_individuals)
+    
+    # Create final phenotype dataframe
+    final_phenotypes = individual_genetic_values.copy()
+    final_phenotypes["environmental_noise"] = environmental_noise
+    final_phenotypes["phenotype"] = (
+        final_phenotypes["genetic_value"] + final_phenotypes["environmental_noise"]
+    )
+
+    print("The final phenotypes are ")
+    print(final_phenotypes)
 
     return final_phenotypes

@@ -366,7 +366,7 @@ def sim_phenotypes_multi_grg(
 
     Returns
     --------------------
-    Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
+    Pandas dataframe with resultant phenotypes. The dataframe contains the following:
     `causal_mutation_id`
     `individual_id`
     `genetic_value`
