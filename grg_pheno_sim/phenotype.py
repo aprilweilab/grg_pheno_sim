@@ -107,7 +107,8 @@ def sim_phenotypes(
     """
 
     if standardized is True:
-        return sim_phenotypes_standardized(grg, heritability, num_causal, random_seed)
+        return sim_phenotypes_standardized(grg, heritability, num_causal, random_seed, save_effect_output,
+                                           effect_path, standardized_output, path, header)
 
     causal_mutation_df = sim_grg_causal_mutation(
         grg, heritability, num_causal=num_causal, model=model, random_seed=random_seed
@@ -289,13 +290,18 @@ def sim_phenotypes_standardized(
     grg,
     heritability,
     num_causal,
-    random_seed
+    random_seed, 
+    save_effect_output,
+    effect_path, 
+    standardized_output, 
+    path, 
+    header
 ):
     """
     Function to simulate phenotypes using standardized genotype matrices.
     
-    Based on the standardized approach where X = (X-U)Σ, and genetic values
-    are computed as Xβ = X(Σβ) - UΣβ.
+    Based on the standardized approach where X' = (X-U)Σ, and genetic values
+    are computed as X'β = X(Σβ) - UΣβ.
 
     Parameters
     ----------
@@ -316,7 +322,7 @@ def sim_phenotypes_standardized(
 
     # Sample effect sizes from normal distribution with variance h²/M_causal
     mean_1 = 0.0  
-    var_1 = (heritability * heritability) / num_causal
+    var_1 = heritability / num_causal
     model_normal = grg_causal_mutation_model("normal", mean=mean_1, var=var_1)
 
     # Simulate causal mutations and their effect sizes
@@ -361,9 +367,9 @@ def sim_phenotypes_standardized(
     for i, (site, beta, freq) in enumerate(zip(causal_sites, effect_sizes, frequencies)):
         sigma_i = np.sqrt(2 * freq * (1 - freq))
         if sigma_i > 0:
-            allele_freq_adjustment += 2 * freq * beta / sigma_i
+            allele_freq_adjustment += (2 * freq * beta) / sigma_i
     
-    # Get sample nodes and calculate final genetic values: Xβ = X(Σβ) - UΣβ
+    # Get sample nodes and calculate final genetic values: X'β = X(Σβ) - UΣβ
     samples_list = grg.get_sample_nodes()
     final_genetic_values = []
     
@@ -387,7 +393,7 @@ def sim_phenotypes_standardized(
     # Calculate variance of genetic values for environmental noise simulation
     # Environmental noise: ε ~ N(0, Var(Xβ)(1/h² - 1))
     genetic_var = individual_genetic_values["genetic_value"].var()
-    noise_var = genetic_var * (1/heritability - 1)
+    noise_var = genetic_var * (1/(heritability) - 1)
     
     # Simulate environmental noise
     rng = np.random.default_rng(random_seed)
@@ -400,8 +406,5 @@ def sim_phenotypes_standardized(
     final_phenotypes["phenotype"] = (
         final_phenotypes["genetic_value"] + final_phenotypes["environmental_noise"]
     )
-
-    print("The final phenotypes are ")
-    print(final_phenotypes)
 
     return final_phenotypes
