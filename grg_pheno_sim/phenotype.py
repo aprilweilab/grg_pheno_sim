@@ -18,7 +18,7 @@ from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
 from grg_pheno_sim.effect_size import allele_frequencies
-
+from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
 
 def phenotype_class_to_df(phenotypes):
     """This function performs extracts the dataframe and performs
@@ -336,16 +336,13 @@ def sim_phenotypes_standardized(
     # Get causal mutation sites and their effect sizes
     causal_sites = causal_mutation_df["mutation_id"].values
     effect_sizes = causal_mutation_df["effect_size"].values
-    
     # Calculate allele frequencies for causal sites
     frequencies = allele_frequencies(grg, causal_mutation_df)
-    
     # Create standardized effect size vector Σβ
     # Σ is diagonal matrix with elements 1/σᵢ where σᵢ = √(2fᵢ(1-fᵢ))
     # So Σβ has elements βᵢ/σᵢ at each causal site
     num_mutations = grg.num_mutations
     standardized_effect_vector = np.zeros(num_mutations, dtype=np.float64)
-    
     for i, (site, beta, freq) in enumerate(zip(causal_sites, effect_sizes, frequencies)):
         # Calculate standard deviation: σᵢ = √(2fᵢ(1-fᵢ))
         sigma_i = np.sqrt(2 * freq * (1 - freq))
@@ -359,7 +356,8 @@ def sim_phenotypes_standardized(
         input=standardized_effect_vector, 
         direction=pygrgl.TraversalDirection.DOWN
     )
-    
+    print("Raw genetic ", raw_genetic_values[0])
+
     # Calculate UΣβ (allele frequency adjustment term)
     # U is N-by-M matrix where each entry in i-th column is 2fᵢ
     # So UΣβ is N-by-1 vector filled with Σᵢ 2fᵢβᵢ/σᵢ
@@ -368,7 +366,7 @@ def sim_phenotypes_standardized(
         sigma_i = np.sqrt(2 * freq * (1 - freq))
         if sigma_i > 0:
             allele_freq_adjustment += (2 * freq * beta) / sigma_i
-    
+    print("Adjustment ", allele_freq_adjustment)
     # Get sample nodes and calculate final genetic values: X'β = X(Σβ) - UΣβ
     samples_list = grg.get_sample_nodes()
     final_genetic_values = []
@@ -376,7 +374,6 @@ def sim_phenotypes_standardized(
     for node in samples_list:
         genetic_value = raw_genetic_values[node] - allele_freq_adjustment
         final_genetic_values.append(genetic_value)
-    
     # Create DataFrame with sample-level genetic values
     sample_effects_df = pd.DataFrame({
         "sample_node_id": samples_list,
@@ -408,3 +405,44 @@ def sim_phenotypes_standardized(
     )
 
     return final_phenotypes
+
+def allele_frequencies_new(grg: pygrgl.GRG) -> np.typing.NDArray:
+    """
+    Get the allele frequencies for the mutations in the given GRG.
+
+    :param grg: The GRG.
+    :type grg: pygrgl.GRG
+    :return: A vector of length grg.num_mutations, containing allele frequencies
+        indexed by MutationID.
+    :rtype: numpy.ndarray
+    """
+    return pygrgl.matmul(
+        grg,
+        np.ones((1, grg.num_samples), dtype=np.int32),
+        pygrgl.TraversalDirection.UP,
+    )[0] / (grg.num_samples)
+
+def sim_phenotypes_StdOp(grg,
+    heritability,
+    num_causal=1000,
+    random_seed = 42
+):    
+    # Sample effect sizes from normal distribution with variance h²/M_causal
+    mean_1 = 0.0  
+    var_1 = heritability / num_causal
+    model_normal = grg_causal_mutation_model("normal", mean=mean_1, var=var_1)
+
+    # Simulate causal mutations and their effect sizes
+    causal_mutation_df = sim_grg_causal_mutation(
+        grg, model=model_normal, num_causal=num_causal, random_seed=random_seed
+    )
+        # Get causal mutation sites and their effect sizes
+    causal_sites = causal_mutation_df["mutation_id"].values
+    effect_sizes = causal_mutation_df["effect_size"].values
+
+    freqs = allele_frequencies_new(grg)  
+    beta_full = np.zeros(grg.num_mutations, dtype=float)
+    beta_full[causal_sites] = causal_mutation_df["effect_size"].values
+    print(beta_full[48])
+    standard_gv = _SciPyStdXOperator(grg, direction= pygrgl.TraversalDirection.UP, freqs = freqs, haploid= False).dot(beta_full)
+    print(standard_gv[0])

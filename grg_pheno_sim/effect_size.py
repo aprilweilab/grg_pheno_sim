@@ -101,8 +101,7 @@ def allele_frequencies(grg, effects):
         final_frequencies = []
 
         for mutation in mutations:
-            final_frequencies.append(frequencies[mutation])
-
+            final_frequencies.append(frequencies[mutation])          
         return final_frequencies
 
     else:  # for multivariate causal mutation simulation
