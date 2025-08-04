@@ -36,6 +36,7 @@ def sim_binary_phenotypes(
     standardized_output=False,
     path=None,
     header=False,
+    standardized = False
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -74,6 +75,8 @@ def sim_binary_phenotypes(
     Default value is None.
     header: This boolean parameter decides whether the .phen output file contains column
     headers or not. Default value is False.
+    standardized: This boolean parameters decides whether the simulation uses standardized genotypes.
+
 
     Returns
     --------------------
@@ -84,6 +87,7 @@ def sim_binary_phenotypes(
     `environmental_noise`
     `phenotype`
     """
+    # if standardized:               
 
     causal_mutation_df = sim_grg_causal_mutation(
         grg, num_causal=num_causal, model=model, random_seed=random_seed
@@ -274,3 +278,4 @@ def sim_binary_phenotypes_custom(
         convert_to_phen(final_phenotypes, path, include_header=header)
 
     return final_phenotypes
+

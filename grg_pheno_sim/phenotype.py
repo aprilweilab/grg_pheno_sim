@@ -355,7 +355,6 @@ def sim_phenotypes_standardized(
         input=standardized_effect_vector, 
         direction=pygrgl.TraversalDirection.DOWN
     )
-    print("Raw genetic ", raw_genetic_values[0]+ raw_genetic_values[1])
 
     # Calculate UΣβ (allele frequency adjustment term)
     # U is N-by-M matrix where each entry in i-th column is 2fᵢ
@@ -441,8 +440,36 @@ def sim_phenotypes_StdOp(grg,
     freqs = allele_frequencies_new(grg)  
     beta_full = np.zeros(grg.num_mutations, dtype=float)
     beta_full[causal_sites] = causal_mutation_df["effect_size"].values
-    print(beta_full[48])
     beta_full = beta_full.reshape(-1,1)
-    standard_gv = _SciPyStdXOperator(grg, direction= pygrgl.TraversalDirection.UP, freqs = freqs, haploid= False)._matmat(beta_full)
-    for i in range(20):
-        print(standard_gv[i][0])
+    individual_genetic_values = np.squeeze(_SciPyStdXOperator(grg, direction= pygrgl.TraversalDirection.UP, freqs = freqs, haploid= False)._matmat(beta_full))
+    
+    # Calculate variance of genetic values for environmental noise simulation
+    # Environmental noise: ε ~ N(0, Var(Xβ)(1/h² - 1))
+        
+    n_ind = grg.num_individuals
+    df = pd.DataFrame({
+        "individual_id":      np.arange(n_ind, dtype=int),
+        "genetic_value":      individual_genetic_values,
+        "causal_mutation_id": 0,
+    })
+    # 6) Simulate env noise
+    gvar      = df["genetic_value"].var(ddof=1)
+    noise_var = gvar * (1.0/heritability - 1.0)
+    rng       = np.random.default_rng(random_seed)
+    df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
+
+    # 7) Final phenotype = G + E
+    df["phenotype"] = df["genetic_value"] + df["environmental_noise"]
+    final = df[
+        [
+            "individual_id",
+            "genetic_value",
+            "causal_mutation_id",
+            "environmental_noise",
+            "phenotype",
+        ]
+    ].reset_index(drop=True)
+
+    return final
+
+    
