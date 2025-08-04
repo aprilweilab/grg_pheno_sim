@@ -6,7 +6,7 @@ and then converting continuous phenotypes to binary phenotypes.
 
 import pandas as pd
 import scipy.stats as stats
-
+from grg_pheno_sim.phenotype import sim_phenotypes_StdOp
 from grg_pheno_sim.effect_size import (
     sim_grg_causal_mutation,
     additive_effect_sizes,
@@ -279,3 +279,57 @@ def sim_binary_phenotypes_custom(
 
     return final_phenotypes
 
+def sim_binary_phenotypes_standOp(
+    grg,
+    population_prevalence: float,
+    heritability: float,
+    num_causal: int = 1000,
+    random_seed: int = 42,
+    standardized_output: bool = False,
+    path: str = None,
+    header: bool = False,
+) -> pd.DataFrame:
+    """
+    Simulate binary phenotypes using the standardized‐operator pipeline.
+
+    Parameters
+    ----------
+    grg
+        Your GRG object.
+    population_prevalence
+        Prevalence k (e.g. 0.1 for 10% case rate).
+    heritability
+        Narrow‐sense h² used in the standardized pipeline.
+    num_causal
+        Number of causal SNPs to draw.
+    random_seed
+        Seed for causal effects & noise.
+    standardized_output
+        If True, writes out a `.phen` file.
+    path
+        Path for the `.phen` output (tab‐delimited).
+    header
+        Whether to include a header line in the `.phen`.
+
+    Returns
+    -------
+    A DataFrame with columns
+      individual_id, genetic_value, causal_mutation_id,
+      environmental_noise, phenotype
+    where `phenotype` is 0/1.
+    """
+
+    # 1) Get continuous phenotypes (G + E)
+    df_cont = sim_phenotypes_StdOp(
+        grg,
+        heritability=heritability,
+        num_causal=num_causal,
+        random_seed=random_seed
+    )
+
+    # 2) Threshold to binary
+    k = population_prevalence
+    T = stats.norm.ppf(1.0 - k)
+    df_cont["phenotype"] = (df_cont["phenotype"] >= T).astype(int)
+    
+    return df_cont
