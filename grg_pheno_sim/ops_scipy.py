@@ -76,7 +76,6 @@ class SciPyStandardizedOperator(LinearOperator):
             1,
             self.original_sigma,
         )
-        self.zero_sigma_mask    = (self.original_sigma == 0)
         super().__init__(dtype=dtype, shape=shape)
 
 
@@ -122,8 +121,6 @@ class SciPyStdXOperator(SciPyStandardizedOperator):
         with numpy.errstate(divide="raise"):
             if self.direction == pygrgl.TraversalDirection.UP:
                 vS = other_matrix.T / self.sigma_corrected
-                vS[:, self.zero_sigma_mask] = 0
-                print("Size", vS.shape)
                 XvS = numpy.transpose(
                     pygrgl.matmul(
                         self.grg,
@@ -133,7 +130,7 @@ class SciPyStdXOperator(SciPyStandardizedOperator):
                     )
                 )
                 print(XvS.shape)
-                print("Ops raw genetic mult ", XvS[0])
+                print("Ops raw genetic mult 0", XvS[0][0])
                 consts = numpy.sum(self.mult_const * self.freqs * vS, axis=1)
                 print("Ops adj ", consts)
                 return XvS - consts.T

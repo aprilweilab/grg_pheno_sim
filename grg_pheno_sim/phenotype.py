@@ -348,7 +348,6 @@ def sim_phenotypes_standardized(
         sigma_i = np.sqrt(2 * freq * (1 - freq))
         if sigma_i > 0:  # Avoid division by zero
             standardized_effect_vector[site] = beta / sigma_i
-    
     # Calculate X(Σβ) using dot product with DOWN direction
     # This gives us the raw genetic values before allele frequency adjustment
     raw_genetic_values = pygrgl.dot_product(
@@ -356,7 +355,7 @@ def sim_phenotypes_standardized(
         input=standardized_effect_vector, 
         direction=pygrgl.TraversalDirection.DOWN
     )
-    print("Raw genetic ", raw_genetic_values[0])
+    print("Raw genetic ", raw_genetic_values[0]+ raw_genetic_values[1])
 
     # Calculate UΣβ (allele frequency adjustment term)
     # U is N-by-M matrix where each entry in i-th column is 2fᵢ
@@ -366,13 +365,12 @@ def sim_phenotypes_standardized(
         sigma_i = np.sqrt(2 * freq * (1 - freq))
         if sigma_i > 0:
             allele_freq_adjustment += (2 * freq * beta) / sigma_i
-    print("Adjustment ", allele_freq_adjustment)
     # Get sample nodes and calculate final genetic values: X'β = X(Σβ) - UΣβ
     samples_list = grg.get_sample_nodes()
     final_genetic_values = []
     
     for node in samples_list:
-        genetic_value = raw_genetic_values[node] - allele_freq_adjustment
+        genetic_value = raw_genetic_values[node] - 0.5 *allele_freq_adjustment
         final_genetic_values.append(genetic_value)
     # Create DataFrame with sample-level genetic values
     sample_effects_df = pd.DataFrame({
@@ -444,5 +442,7 @@ def sim_phenotypes_StdOp(grg,
     beta_full = np.zeros(grg.num_mutations, dtype=float)
     beta_full[causal_sites] = causal_mutation_df["effect_size"].values
     print(beta_full[48])
-    standard_gv = _SciPyStdXOperator(grg, direction= pygrgl.TraversalDirection.UP, freqs = freqs, haploid= False).dot(beta_full)
-    print(standard_gv[0])
+    beta_full = beta_full.reshape(-1,1)
+    standard_gv = _SciPyStdXOperator(grg, direction= pygrgl.TraversalDirection.UP, freqs = freqs, haploid= False)._matmat(beta_full)
+    for i in range(20):
+        print(standard_gv[i][0])
