@@ -18,7 +18,8 @@ from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
 from grg_pheno_sim.phenotype import convert_to_phen
-
+from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
+from grg_pheno_sim.phenotype import allele_frequencies_new
 
 def sim_binary_phenotypes(
     grg,
