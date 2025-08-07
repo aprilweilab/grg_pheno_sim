@@ -171,6 +171,7 @@ def sim_phenotypes(
 def sim_phenotypes_custom(
     grg,
     input_effects,
+    random_seed=42,
     normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
     heritability=None,
@@ -182,6 +183,7 @@ def sim_phenotypes_custom(
     standardized_output=False,
     path=None,
     header=False,
+    standardized = False
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -217,7 +219,8 @@ def sim_phenotypes_custom(
     `environmental_noise`
     `phenotype`
     """
-
+    if standardized:
+        return sim_phenotypes_custom_stdOp(grg, input_effects, heritability, random_seed, save_effect_output,effect_path,standardized_output, path,header)
     if isinstance(input_effects, dict):
         causal_mutation_df = pd.DataFrame(
             list(input_effects.items()), columns=["mutation_id", "effect_size"]
@@ -261,6 +264,7 @@ def sim_phenotypes_custom(
         if check:
             phenotypes = sim_env_noise(
                 individual_genetic_values,
+                random_seed= random_seed,
                 user_defined=True,
                 mean=user_mean,
                 std=user_cov,
@@ -268,6 +272,7 @@ def sim_phenotypes_custom(
         else:
             phenotypes = sim_env_noise(
                 individual_genetic_values,
+                random_seed= random_seed,
                 user_defined=True,
                 means=user_mean,
                 cov=user_cov,
