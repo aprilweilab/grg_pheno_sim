@@ -107,7 +107,7 @@ def sim_phenotypes(
     """
 
     if standardized is True:
-        return sim_phenotypes_standardized(grg, heritability, num_causal, random_seed, save_effect_output,
+        return sim_phenotypes_StdOp(grg, heritability, num_causal, random_seed, save_effect_output,
                                            effect_path, standardized_output, path, header)
 
     causal_mutation_df = sim_grg_causal_mutation(
@@ -425,7 +425,12 @@ def sim_phenotypes_StdOp(
     grg,
     heritability,
     num_causal=1000,
-    random_seed = 42
+    random_seed = 42, 
+    save_effect_output=False,
+    effect_path=None,
+    standardized_output=False,
+    path=None,
+    header=False,
 ):    
     # Sample effect sizes from normal distribution with variance h²/M_causal
     mean_1 = 0.0  
@@ -436,6 +441,12 @@ def sim_phenotypes_StdOp(
     causal_mutation_df = sim_grg_causal_mutation(
         grg, model=model_normal, num_causal=num_causal, random_seed=random_seed
     )
+
+    print("The initial effect sizes are ")
+    print(causal_mutation_df)
+
+    if save_effect_output == True:
+        convert_to_effect_output(causal_mutation_df, grg, effect_path)
     
     # Get causal mutation sites and their effect sizes
     causal_sites = causal_mutation_df["mutation_id"].values
@@ -453,6 +464,10 @@ def sim_phenotypes_StdOp(
         "genetic_value":      individual_genetic_values,
         "causal_mutation_id": 0,
     })
+
+    print("The genetic values of the individuals are ")
+    print(df)
+
     # Simulate env noise ddof question
     gvar      = df["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0/heritability - 1.0)
@@ -470,6 +485,9 @@ def sim_phenotypes_StdOp(
             "phenotype",
         ]
     ].reset_index(drop=True)
+
+    if standardized_output == True:
+        convert_to_phen(final, path, include_header=header)
 
     return final
 
@@ -531,7 +549,7 @@ def sim_phenotypes_custom_stdOp(
         causal_mutation_df = input_effects
         causal_mutation_df["causal_mutation_id"] = 0
 
-    print("Custom effect sizes:")
+    print("The initial effect sizes are ")
     print(causal_mutation_df)
 
     if save_effect_output:
@@ -559,7 +577,9 @@ def sim_phenotypes_custom_stdOp(
         "causal_mutation_id": 0
     })
 
-    ### ddof 1 or 0???
+    print("The genetic values of the individuals are ")
+    print(out)
+
     gvar = out["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
     rng = np.random.default_rng(random_seed)
@@ -569,7 +589,6 @@ def sim_phenotypes_custom_stdOp(
 
     out["phenotype"] = out["genetic_value"] + out["environmental_noise"]
 
-    ###Not sure why name is standardized output, but matches other method
     if standardized_output:
         convert_to_phen(out, path, include_header=header)
 

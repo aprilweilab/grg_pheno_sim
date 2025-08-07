@@ -286,9 +286,11 @@ def sim_binary_phenotypes_standOp(
     heritability: float,
     num_causal: int = 1000,
     random_seed: int = 42,
+    save_effect_output=False,
+    effect_path=None,
     standardized_output: bool = False,
     path: str = None,
-    header: bool = False,
+    header: bool = False
 ) -> pd.DataFrame:
     """
     Simulate binary phenotypes using the standardized‐operator pipeline.
@@ -325,7 +327,9 @@ def sim_binary_phenotypes_standOp(
         grg,
         heritability=heritability,
         num_causal=num_causal,
-        random_seed=random_seed
+        random_seed=random_seed,
+        save_effect_output= save_effect_output,
+        effect_path= effect_path
     )
 
     # 2) Threshold to binary

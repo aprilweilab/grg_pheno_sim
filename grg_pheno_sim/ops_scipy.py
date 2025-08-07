@@ -129,9 +129,7 @@ class SciPyStdXOperator(SciPyStandardizedOperator):
                         by_individual=not self.haploid,
                     )
                 )
-                print("Ops raw genetic mult 0", XvS[0][0])
                 consts = numpy.sum(self.mult_const * self.freqs * vS, axis=1)
-                print("Ops adj ", consts)
                 return XvS - consts.T
             else:
                 assert self.direction == pygrgl.TraversalDirection.DOWN
