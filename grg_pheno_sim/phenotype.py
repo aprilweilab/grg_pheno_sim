@@ -111,7 +111,7 @@ def sim_phenotypes(
                                            effect_path, standardized_output, path, header)
 
     causal_mutation_df = sim_grg_causal_mutation(
-        grg, heritability, num_causal=num_causal, model=model, random_seed=random_seed
+        grg, model = model num_causal=num_causal, random_seed=random_seed
     )
 
     print("The initial effect sizes are ")
