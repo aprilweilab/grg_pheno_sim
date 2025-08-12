@@ -4,6 +4,7 @@ and then converting continuous phenotypes to binary phenotypes.
 =======
 """
 import numpy as np
+import pygrgl
 import pandas as pd
 import scipy.stats as stats
 from grg_pheno_sim.phenotype import sim_phenotypes_StdOp
@@ -88,7 +89,8 @@ def sim_binary_phenotypes(
     `environmental_noise`
     `phenotype`
     """
-    # if standardized:               
+    if standardized:               
+        return sim_binary_phenotypes_standOp(grg,population_prevalence,heritability,num_causal,random_seed,save_effect_output,effect_path,standardized_output,path,header)
 
     causal_mutation_df = sim_grg_causal_mutation(
         grg, num_causal=num_causal, model=model, random_seed=random_seed
@@ -154,6 +156,7 @@ def sim_binary_phenotypes_custom(
     grg,
     input_effects,
     population_prevalence,
+    random_seed=42,
     normalize_genetic_values_before_noise=False,
     heritability=None,
     user_mean=None,
@@ -164,6 +167,7 @@ def sim_binary_phenotypes_custom(
     standardized_output=False,
     path=None,
     header=False,
+    standardized = False
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -209,7 +213,8 @@ def sim_binary_phenotypes_custom(
     `environmental_noise`
     `phenotype`
     """
-
+    if standardized:
+        return sim_binary_phenotypes_custom_stdOp(grg,input_effects,population_prevalence, heritability, random_seed, save_effect_output, effect_path, standardized_output,path,header)
     if isinstance(input_effects, dict):
         causal_mutation_df = pd.DataFrame(
             list(input_effects.items()), columns=["mutation_id", "effect_size"]
@@ -293,33 +298,39 @@ def sim_binary_phenotypes_standOp(
     header: bool = False
 ) -> pd.DataFrame:
     """
-    Simulate binary phenotypes using the standardized‐operator pipeline.
+    Function to simulate binary phenotypes using the standardized genotype operator
+    pipeline. This method uses standardized genotype matrices internally for genetic
+    value computation and environmental noise simulation. At the end, a Gaussian
+    threshold is applied to generate binary phenotypes.
 
     Parameters
     ----------
-    grg
-        Your GRG object.
-    population_prevalence
-        Prevalence k (e.g. 0.1 for 10% case rate).
-    heritability
-        Narrow‐sense h² used in the standardized pipeline.
-    num_causal
-        Number of causal SNPs to draw.
-    random_seed
-        Seed for causal effects & noise.
-    standardized_output
-        If True, writes out a `.phen` file.
-    path
-        Path for the `.phen` output (tab‐delimited).
-    header
-        Whether to include a header line in the `.phen`.
+    grg: The GRG on which phenotypes will be simulated.
+    population_prevalence: The prevalence of the condition in the general population.
+        A value of 0.1 means 1 in 10 individuals have the condition.
+    heritability: The narrow‐sense heritability (h²) used for environmental noise simulation.
+    num_causal: Number of causal sites to simulate. Default is 1000.
+    random_seed: Random seed used for causal mutation effect simulation and noise generation.
+        Default is 42.
+    save_effect_output: Boolean flag indicating whether effect sizes will be saved to a `.par`
+        file in standard format. Default is False.
+    effect_path: Path to save the `.par` file containing simulated effect sizes.
+        Used only if `save_effect_output` is True. Default is None.
+    standardized_output: Boolean flag indicating whether the final binary phenotypes will be
+        saved to a `.phen` file in standard format. Default is False.
+    path: Path to save the `.phen` file containing simulated phenotypes.
+        Used only if `standardized_output` is True. Default is None.
+    header: Boolean flag indicating whether the `.phen` output file should include column
+        headers. Default is False.
 
     Returns
     -------
-    A DataFrame with columns
-      individual_id, genetic_value, causal_mutation_id,
-      environmental_noise, phenotype
-    where `phenotype` is 0/1.
+    Pandas DataFrame containing:
+        `causal_mutation_id` 
+        `individual_id` 
+        `genetic_value` 
+        `environmental_noise` 
+        `phenotype` - Binary phenotype (0 = control, 1 = case) 
     """
 
     # 1) Get continuous phenotypes (G + E)
@@ -426,6 +437,8 @@ def sim_binary_phenotypes_custom_stdOp(
         "genetic_value": G,
         "causal_mutation_id": 0
     })
+    print("The genetic values of the individuals are ")
+    print(df)
 
     gvar = df["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)

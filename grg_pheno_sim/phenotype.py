@@ -430,13 +430,57 @@ def sim_phenotypes_StdOp(
     grg,
     heritability,
     num_causal=1000,
-    random_seed = 42, 
+    random_seed = 42,
+    normalize_genetic_values_before_noise=False,
     save_effect_output=False,
     effect_path=None,
     standardized_output=False,
     path=None,
     header=False,
-):    
+):
+    """
+    Function to simulate continuous phenotypes (G + E) using the standardized genotype
+    operator pipeline. Effect sizes are drawn from a normal distribution with variance
+    h^2 / M_causal so that the realized genetic variance targets the requested heritability.
+    Environmental noise is then added to achieve total variance consistent with h^2.
+
+    Parameters
+    ----------
+    grg: The GRG on which phenotypes will be simulated.
+    heritability: Narrow-sense heritability (h^2) used to set the effect-size variance
+        and to scale the environmental noise (0 < h^2 <= 1).
+    num_causal: Number of causal sites to simulate. Default is 1000.
+    random_seed: Random seed used for causal effect simulation and environmental noise.
+        Default is 42.
+    normalize_genetic_values_before_noise: If True, normalize the per-individual genetic
+        values before adding environmental noise. Default is False.
+    save_effect_output: If True, save simulated effect sizes to a `.par` file in the
+        standard format. Default is False.
+    effect_path: Output path for the `.par` file containing effect sizes. Used only if
+        `save_effect_output` is True. Default is None.
+    standardized_output: If True, save the simulated phenotypes to a `.phen` file in the
+        standard format. Default is False.
+    path: Output path for the `.phen` file containing simulated phenotypes. Used only if
+        `standardized_output` is True. Default is None.
+    header: Whether the `.phen` output should include a header row. Default is False.
+
+    Returns
+    -------
+    Pandas dataframe with columns:
+        `individual_id`        - Integer ID for each individual.
+        `genetic_value`        - Genetic value computed via the standardized genotype operator.
+        `causal_mutation_id`   - Identifier of the (univariate) causal component; 0 if single-set.
+        `environmental_noise`  - Gaussian environmental term scaled to match the target h^2.
+        `phenotype`            - Final continuous phenotype: genetic_value + environmental_noise.
+
+    Notes
+    -----
+    - Effect sizes are sampled from N(0, h^2 / num_causal) and applied with the standardized
+      genotype operator, which implicitly uses per-site standardization (e.g., σ_i = sqrt(2 f_i (1 − f_i))).
+    - The environmental variance is set to Var(E) = Var(G) * (1/h^2 − 1) based on the sample
+      genetic variance to better match realized heritability in finite samples.
+    - Set `standardized_output=True` to emit a `.phen` file compatible with downstream tools.
+    """
     # Sample effect sizes from normal distribution with variance h²/M_causal
     mean_1 = 0.0  
     var_1 = heritability / num_causal
@@ -472,6 +516,9 @@ def sim_phenotypes_StdOp(
 
     print("The genetic values of the individuals are ")
     print(df)
+
+    if normalize_genetic_values_before_noise == True:
+        df = normalize_genetic_values(df)
 
     # Simulate env noise ddof question
     gvar      = df["genetic_value"].var(ddof=1)
