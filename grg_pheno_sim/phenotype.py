@@ -20,6 +20,7 @@ from grg_pheno_sim.normalization import normalize
 from grg_pheno_sim.effect_size import allele_frequencies
 from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
 
+
 def phenotype_class_to_df(phenotypes):
     """This function performs extracts the dataframe and performs
     necessary modifications before returning it.
@@ -67,7 +68,7 @@ def sim_phenotypes(
     standardized_output=False,
     path=None,
     header=False,
-    standardized=False
+    standardized=False,
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -76,7 +77,7 @@ def sim_phenotypes(
     ----------
     grg: The GRG on which phenotypes will be simulated.
     model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
-    Default model used is the standard Gaussian. 
+    Default model used is the standard Gaussian.
     num_causal: Number of causal sites simulated. Default value used is 1000.
     random_seed: The random seed used for causal mutation simulation. Default values is 42.
     normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
@@ -107,11 +108,20 @@ def sim_phenotypes(
     """
 
     if standardized is True:
-        return sim_phenotypes_StdOp(grg, heritability, num_causal, random_seed, save_effect_output,
-                                           effect_path, standardized_output, path, header)
+        return sim_phenotypes_StdOp(
+            grg,
+            heritability,
+            num_causal,
+            random_seed,
+            save_effect_output,
+            effect_path,
+            standardized_output,
+            path,
+            header,
+        )
 
     causal_mutation_df = sim_grg_causal_mutation(
-        grg, model = model, num_causal=num_causal, random_seed=random_seed
+        grg, model=model, num_causal=num_causal, random_seed=random_seed
     )
 
     print("The initial effect sizes are ")
@@ -183,7 +193,7 @@ def sim_phenotypes_custom(
     standardized_output=False,
     path=None,
     header=False,
-    standardized = False
+    standardized=False,
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -220,7 +230,17 @@ def sim_phenotypes_custom(
     `phenotype`
     """
     if standardized:
-        return sim_phenotypes_custom_stdOp(grg, input_effects, heritability, random_seed, save_effect_output,effect_path,standardized_output, path,header)
+        return sim_phenotypes_custom_stdOp(
+            grg,
+            input_effects,
+            heritability,
+            random_seed,
+            save_effect_output,
+            effect_path,
+            standardized_output,
+            path,
+            header,
+        )
     if isinstance(input_effects, dict):
         causal_mutation_df = pd.DataFrame(
             list(input_effects.items()), columns=["mutation_id", "effect_size"]
@@ -264,7 +284,6 @@ def sim_phenotypes_custom(
         if check:
             phenotypes = sim_env_noise(
                 individual_genetic_values,
-                random_seed= random_seed,
                 user_defined=True,
                 mean=user_mean,
                 std=user_cov,
@@ -272,7 +291,6 @@ def sim_phenotypes_custom(
         else:
             phenotypes = sim_env_noise(
                 individual_genetic_values,
-                random_seed= random_seed,
                 user_defined=True,
                 means=user_mean,
                 cov=user_cov,
@@ -291,22 +309,23 @@ def sim_phenotypes_custom(
 
     return final_phenotypes
 
-#NAIVE APPROACH FOR STANDARDIZED GENES
+
+# NAIVE APPROACH FOR STANDARDIZED GENES
 
 # def sim_phenotypes_standardized(
 #     grg,
 #     heritability,
 #     num_causal,
-#     random_seed, 
+#     random_seed,
 #     save_effect_output,
-#     effect_path, 
-#     standardized_output, 
-#     path, 
+#     effect_path,
+#     standardized_output,
+#     path,
 #     header
 # ):
 #     """
 #     Function to simulate phenotypes using standardized genotype matrices.
-    
+
 #     Based on the standardized approach where X' = (X-U)Σ, and genetic values
 #     are computed as X'β = X(Σβ) - UΣβ.
 
@@ -328,7 +347,7 @@ def sim_phenotypes_custom(
 #     """
 
 #     # Sample effect sizes from normal distribution with variance h²/M_causal
-#     mean_1 = 0.0  
+#     mean_1 = 0.0
 #     var_1 = heritability / num_causal
 #     model_normal = grg_causal_mutation_model("normal", mean=mean_1, var=var_1)
 
@@ -358,8 +377,8 @@ def sim_phenotypes_custom(
 #     # Calculate X(Σβ) using dot product with DOWN direction
 #     # This gives us the raw genetic values before allele frequency adjustment
 #     raw_genetic_values = pygrgl.dot_product(
-#         grg=grg, 
-#         input=standardized_effect_vector, 
+#         grg=grg,
+#         input=standardized_effect_vector,
 #         direction=pygrgl.TraversalDirection.DOWN
 #     )
 
@@ -374,7 +393,7 @@ def sim_phenotypes_custom(
 #     # Get sample nodes and calculate final genetic values: X'β = X(Σβ) - UΣβ
 #     samples_list = grg.get_sample_nodes()
 #     final_genetic_values = []
-    
+
 #     for node in samples_list:
 #         genetic_value = raw_genetic_values[node] - 0.5 *allele_freq_adjustment
 #         final_genetic_values.append(genetic_value)
@@ -384,7 +403,7 @@ def sim_phenotypes_custom(
 #         "genetic_value": final_genetic_values,
 #         "causal_mutation_id": 0
 #     })
-    
+
 #     # Convert sample-level genetic values to individual-level
 #     individual_genetic_values = samples_to_individuals(sample_effects_df)
 
@@ -395,12 +414,12 @@ def sim_phenotypes_custom(
 #     # Environmental noise: ε ~ N(0, Var(Xβ)(1/h² - 1))
 #     genetic_var = individual_genetic_values["genetic_value"].var()
 #     noise_var = genetic_var * (1/(heritability) - 1)
-    
+
 #     # Simulate environmental noise
 #     rng = np.random.default_rng(random_seed)
 #     num_individuals = len(individual_genetic_values)
 #     environmental_noise = rng.normal(0, np.sqrt(noise_var), size=num_individuals)
-    
+
 #     # Create final phenotype dataframe
 #     final_phenotypes = individual_genetic_values.copy()
 #     final_phenotypes["environmental_noise"] = environmental_noise
@@ -410,9 +429,10 @@ def sim_phenotypes_custom(
 
 #     return final_phenotypes
 
+
 def allele_frequencies_new(grg: pygrgl.GRG) -> np.typing.NDArray:
     """
-    Get the allele frequencies for the mutations in the given GRG.
+    Get the allele frequencies for the mutations in the given GRG. This is custom for the desired format that we use with the scipy operator
 
     :param grg: The GRG.
     :type grg: pygrgl.GRG
@@ -426,11 +446,12 @@ def allele_frequencies_new(grg: pygrgl.GRG) -> np.typing.NDArray:
         pygrgl.TraversalDirection.UP,
     )[0] / (grg.num_samples)
 
+
 def sim_phenotypes_StdOp(
     grg,
     heritability,
     num_causal=1000,
-    random_seed = 42,
+    random_seed=42,
     normalize_genetic_values_before_noise=False,
     save_effect_output=False,
     effect_path=None,
@@ -482,7 +503,7 @@ def sim_phenotypes_StdOp(
     - Set `standardized_output=True` to emit a `.phen` file compatible with downstream tools.
     """
     # Sample effect sizes from normal distribution with variance h²/M_causal
-    mean_1 = 0.0  
+    mean_1 = 0.0
     var_1 = heritability / num_causal
     model_normal = grg_causal_mutation_model("normal", mean=mean_1, var=var_1)
 
@@ -496,23 +517,29 @@ def sim_phenotypes_StdOp(
 
     if save_effect_output == True:
         convert_to_effect_output(causal_mutation_df, grg, effect_path)
-    
+
     # Get causal mutation sites and their effect sizes
     causal_sites = causal_mutation_df["mutation_id"].values
     effect_sizes = causal_mutation_df["effect_size"].values
 
-    freqs = allele_frequencies_new(grg)  
+    freqs = allele_frequencies_new(grg)
     beta_full = np.zeros(grg.num_mutations, dtype=float)
     beta_full[causal_sites] = causal_mutation_df["effect_size"].values
-    beta_full = beta_full.reshape(-1,1)
-    individual_genetic_values = np.squeeze(_SciPyStdXOperator(grg, direction= pygrgl.TraversalDirection.UP, freqs = freqs, haploid= False)._matmat(beta_full))
-    
+    beta_full = beta_full.reshape(-1, 1)
+    individual_genetic_values = np.squeeze(
+        _SciPyStdXOperator(
+            grg, direction=pygrgl.TraversalDirection.UP, freqs=freqs, haploid=False
+        )._matmat(beta_full)
+    )
+
     n_ind = grg.num_individuals
-    df = pd.DataFrame({
-        "individual_id":      np.arange(n_ind, dtype=int),
-        "genetic_value":      individual_genetic_values,
-        "causal_mutation_id": 0,
-    })
+    df = pd.DataFrame(
+        {
+            "individual_id": np.arange(n_ind, dtype=int),
+            "genetic_value": individual_genetic_values,
+            "causal_mutation_id": 0,
+        }
+    )
 
     print("The genetic values of the individuals are ")
     print(df)
@@ -521,9 +548,9 @@ def sim_phenotypes_StdOp(
         df = normalize_genetic_values(df)
 
     # Simulate env noise ddof question
-    gvar      = df["genetic_value"].var(ddof=1)
-    noise_var = gvar * (1.0/heritability - 1.0)
-    rng       = np.random.default_rng(random_seed)
+    gvar = df["genetic_value"].var(ddof=1)
+    noise_var = gvar * (1.0 / heritability - 1.0)
+    rng = np.random.default_rng(random_seed)
     df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
 
     # 7 Final phenotype = G + E
@@ -542,6 +569,7 @@ def sim_phenotypes_StdOp(
         convert_to_phen(final, path, include_header=header)
 
     return final
+
 
 def sim_phenotypes_custom_stdOp(
     grg,
@@ -609,25 +637,29 @@ def sim_phenotypes_custom_stdOp(
 
     M = grg.num_mutations
     beta = np.zeros(M, dtype=float)
-    beta[causal_mutation_df["mutation_id"].astype(int).values] = causal_mutation_df["effect_size"].values
+    beta[causal_mutation_df["mutation_id"].astype(int).values] = causal_mutation_df[
+        "effect_size"
+    ].values
 
     freqs = allele_frequencies_new(grg)
 
-    #Standardize and compute genetic values via SciPyStdXOperator
+    # Standardize and compute genetic values via SciPyStdXOperator
     std_op = _SciPyStdXOperator(
         grg,
         direction=pygrgl.TraversalDirection.UP,  # aggregate to samples
         freqs=freqs,
-        haploid=False
+        haploid=False,
     )
     gv = std_op._matmat(beta.reshape(-1, 1)).squeeze()
 
     n_ind = grg.num_individuals
-    out = pd.DataFrame({
-        "individual_id": np.arange(n_ind, dtype=int),
-        "genetic_value": gv,
-        "causal_mutation_id": 0
-    })
+    out = pd.DataFrame(
+        {
+            "individual_id": np.arange(n_ind, dtype=int),
+            "genetic_value": gv,
+            "causal_mutation_id": 0,
+        }
+    )
 
     print("The genetic values of the individuals are ")
     print(out)
@@ -635,9 +667,7 @@ def sim_phenotypes_custom_stdOp(
     gvar = out["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
     rng = np.random.default_rng(random_seed)
-    out["environmental_noise"] = rng.normal(
-        0.0, np.sqrt(noise_var), size=n_ind
-    )
+    out["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
 
     out["phenotype"] = out["genetic_value"] + out["environmental_noise"]
 

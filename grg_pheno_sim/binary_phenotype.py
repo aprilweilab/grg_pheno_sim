@@ -3,6 +3,7 @@ This file simulates binary phenotypes on GRGs by using the usual simulation meth
 and then converting continuous phenotypes to binary phenotypes.
 =======
 """
+
 import numpy as np
 import pygrgl
 import pandas as pd
@@ -22,6 +23,7 @@ from grg_pheno_sim.phenotype import convert_to_phen
 from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
 from grg_pheno_sim.phenotype import allele_frequencies_new
 
+
 def sim_binary_phenotypes(
     grg,
     population_prevalence,
@@ -38,7 +40,7 @@ def sim_binary_phenotypes(
     standardized_output=False,
     path=None,
     header=False,
-    standardized = False
+    standardized=False,
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -89,8 +91,19 @@ def sim_binary_phenotypes(
     `environmental_noise`
     `phenotype`
     """
-    if standardized:               
-        return sim_binary_phenotypes_standOp(grg,population_prevalence,heritability,num_causal,random_seed,save_effect_output,effect_path,standardized_output,path,header)
+    if standardized:
+        return sim_binary_phenotypes_standOp(
+            grg,
+            population_prevalence,
+            heritability,
+            num_causal,
+            random_seed,
+            save_effect_output,
+            effect_path,
+            standardized_output,
+            path,
+            header,
+        )
 
     causal_mutation_df = sim_grg_causal_mutation(
         grg, num_causal=num_causal, model=model, random_seed=random_seed
@@ -167,7 +180,7 @@ def sim_binary_phenotypes_custom(
     standardized_output=False,
     path=None,
     header=False,
-    standardized = False
+    standardized=False,
 ):
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
@@ -214,7 +227,18 @@ def sim_binary_phenotypes_custom(
     `phenotype`
     """
     if standardized:
-        return sim_binary_phenotypes_custom_stdOp(grg,input_effects,population_prevalence, heritability, random_seed, save_effect_output, effect_path, standardized_output,path,header)
+        return sim_binary_phenotypes_custom_stdOp(
+            grg,
+            input_effects,
+            population_prevalence,
+            heritability,
+            random_seed,
+            save_effect_output,
+            effect_path,
+            standardized_output,
+            path,
+            header,
+        )
     if isinstance(input_effects, dict):
         causal_mutation_df = pd.DataFrame(
             list(input_effects.items()), columns=["mutation_id", "effect_size"]
@@ -285,6 +309,7 @@ def sim_binary_phenotypes_custom(
 
     return final_phenotypes
 
+
 def sim_binary_phenotypes_standOp(
     grg,
     population_prevalence: float,
@@ -295,7 +320,7 @@ def sim_binary_phenotypes_standOp(
     effect_path=None,
     standardized_output: bool = False,
     path: str = None,
-    header: bool = False
+    header: bool = False,
 ) -> pd.DataFrame:
     """
     Function to simulate binary phenotypes using the standardized genotype operator
@@ -326,11 +351,11 @@ def sim_binary_phenotypes_standOp(
     Returns
     -------
     Pandas DataFrame containing:
-        `causal_mutation_id` 
-        `individual_id` 
-        `genetic_value` 
-        `environmental_noise` 
-        `phenotype` - Binary phenotype (0 = control, 1 = case) 
+        `causal_mutation_id`
+        `individual_id`
+        `genetic_value`
+        `environmental_noise`
+        `phenotype` - Binary phenotype (0 = control, 1 = case)
     """
 
     # 1) Get continuous phenotypes (G + E)
@@ -339,19 +364,20 @@ def sim_binary_phenotypes_standOp(
         heritability=heritability,
         num_causal=num_causal,
         random_seed=random_seed,
-        save_effect_output= save_effect_output,
-        effect_path= effect_path
+        save_effect_output=save_effect_output,
+        effect_path=effect_path,
     )
 
     # 2) Threshold to binary
     k = population_prevalence
     T = stats.norm.ppf(1.0 - k)
     df_cont["phenotype"] = (df_cont["phenotype"] >= T).astype(int)
-    
+
     if standardized_output == True:
         convert_to_phen(df_cont, path, include_header=header)
 
     return df_cont
+
 
 def sim_binary_phenotypes_custom_stdOp(
     grg,
@@ -417,36 +443,34 @@ def sim_binary_phenotypes_custom_stdOp(
 
     if save_effect_output == True:
         convert_to_effect_output(causal_mutation_df, grg, effect_path)
-    
+
     M = grg.num_mutations
     beta = np.zeros(M, dtype=float)
-    beta[causal_mutation_df["mutation_id"].astype(int).values] = causal_mutation_df["effect_size"].values
-
+    beta[causal_mutation_df["mutation_id"].astype(int).values] = causal_mutation_df[
+        "effect_size"
+    ].values
 
     freqs = allele_frequencies_new(grg)
     std_op = _SciPyStdXOperator(
-        grg,
-        direction=pygrgl.TraversalDirection.UP,
-        freqs=freqs,
-        haploid=False
+        grg, direction=pygrgl.TraversalDirection.UP, freqs=freqs, haploid=False
     )
     G = std_op._matmat(beta.reshape(-1, 1)).squeeze()
 
-    df = pd.DataFrame({
-        "individual_id": np.arange(grg.num_individuals, dtype=int),
-        "genetic_value": G,
-        "causal_mutation_id": 0
-    })
+    df = pd.DataFrame(
+        {
+            "individual_id": np.arange(grg.num_individuals, dtype=int),
+            "genetic_value": G,
+            "causal_mutation_id": 0,
+        }
+    )
     print("The genetic values of the individuals are ")
     print(df)
 
     gvar = df["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
     rng = np.random.default_rng(random_seed)
-    
-    df["environmental_noise"] = rng.normal(
-        0.0, np.sqrt(noise_var), size=len(df)
-    )
+
+    df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=len(df))
 
     T = stats.norm.ppf(1.0 - population_prevalence)
     df["phenotype"] = (df["genetic_value"] + df["environmental_noise"] >= T).astype(int)
