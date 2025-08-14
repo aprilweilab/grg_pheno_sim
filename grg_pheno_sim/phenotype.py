@@ -452,7 +452,6 @@ def sim_phenotypes_StdOp(
     heritability,
     num_causal=1000,
     random_seed=42,
-    normalize_genetic_values_before_noise=False,
     save_effect_output=False,
     effect_path=None,
     standardized_output=False,
@@ -543,9 +542,6 @@ def sim_phenotypes_StdOp(
 
     print("The genetic values of the individuals are ")
     print(df)
-
-    if normalize_genetic_values_before_noise == True:
-        df = normalize_genetic_values(df)
 
     # Simulate env noise ddof question
     gvar = df["genetic_value"].var(ddof=1)
