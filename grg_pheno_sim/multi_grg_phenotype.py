@@ -16,6 +16,7 @@ from grg_pheno_sim.effect_size import (
     convert_to_effect_output,
 )
 from grg_pheno_sim.noise_sim import sim_env_noise
+from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
 from grg_pheno_sim.phenotype import convert_to_phen, phenotype_class_to_df
 
@@ -308,9 +309,9 @@ def sim_phenotypes_multi_grg_sequential(
 
 def sim_phenotypes_multi_grg(
     grg_files,
-    model,
-    num_causal_per_file,
-    random_seed,
+    model=grg_causal_mutation_model("normal", mean=0, var=1),
+    num_causal_per_file=1000,
+    random_seed=42,
     normalize_phenotype=False,
     load_all_ram=False,
     normalize_genetic_values_before_noise=False,
@@ -365,7 +366,7 @@ def sim_phenotypes_multi_grg(
 
     Returns
     --------------------
-    Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
+    Pandas dataframe with resultant phenotypes. The dataframe contains the following:
     `causal_mutation_id`
     `individual_id`
     `genetic_value`
