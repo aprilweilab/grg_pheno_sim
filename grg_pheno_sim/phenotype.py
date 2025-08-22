@@ -426,7 +426,12 @@ def sim_phenotypes_StdOp(
     # Simulate env noise ddof question
     gvar = df["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
-    rng = np.random.default_rng(random_seed)
+
+    if random_seed is not None:
+        rng = np.random.default_rng(random_seed)
+    else:
+        rng = np.random.default_rng()
+
     df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
 
     # 7 Final phenotype = G + E
@@ -542,7 +547,12 @@ def sim_phenotypes_custom_stdOp(
 
     gvar = out["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
-    rng = np.random.default_rng(random_seed)
+
+    if random_seed is not None:
+        rng = np.random.default_rng(random_seed)
+    else:
+        rng = np.random.default_rng()
+        
     out["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
 
     out["phenotype"] = out["genetic_value"] + out["environmental_noise"]
