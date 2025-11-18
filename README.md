@@ -3,6 +3,8 @@ This is a code repository to simulates phenotypes on GRGs (genotype representati
 
 The folder `grg_pheno_sim` contains all the primary source code for the simulator. The `demos` folder contains ipynb notebooks with sample uses and demomstrations of the different stages of the phenotype simulator. It also contains incremental verifications of outputs to ensure accurate simulation. The `test_phenotype_sim` folder contains a suite of test functions used in the demos.
 
+Documentation can be found [here](https://grgl.readthedocs.io/en/latest/examples_and_applications.html#phenotype-simulation).
+
 # Installation
 
 _Installing from pip_ 
