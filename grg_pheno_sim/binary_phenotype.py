@@ -468,7 +468,11 @@ def sim_binary_phenotypes_custom_stdOp(
 
     gvar = df["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
-    rng = np.random.default_rng(random_seed)
+
+    if random_seed is not None:
+        rng = np.random.default_rng(random_seed)
+    else:
+        rng = np.random.default_rng()
 
     df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=len(df))
 

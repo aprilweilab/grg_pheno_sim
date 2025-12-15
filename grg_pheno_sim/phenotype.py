@@ -426,7 +426,12 @@ def sim_phenotypes_StdOp(
     # Simulate env noise ddof question
     gvar = df["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
-    rng = np.random.default_rng(random_seed)
+
+    if random_seed is not None:
+        rng = np.random.default_rng(random_seed)
+    else:
+        rng = np.random.default_rng()
+
     df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
 
     # 7 Final phenotype = G + E
@@ -542,7 +547,12 @@ def sim_phenotypes_custom_stdOp(
 
     gvar = out["genetic_value"].var(ddof=1)
     noise_var = gvar * (1.0 / heritability - 1.0)
-    rng = np.random.default_rng(random_seed)
+
+    if random_seed is not None:
+        rng = np.random.default_rng(random_seed)
+    else:
+        rng = np.random.default_rng()
+
     out["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=n_ind)
 
     out["phenotype"] = out["genetic_value"] + out["environmental_noise"]
@@ -551,3 +561,91 @@ def sim_phenotypes_custom_stdOp(
         convert_to_phen(out, path, include_header=header)
 
     return out
+
+
+def add_covariates(
+    grg,
+    covariates,
+    cov_effects,
+    **sim_kwargs,
+):
+    """
+    Wrapper around sim_phenotypes that adds covariate effects:
+        Y = genetic_value + covariate_value + environmental_noise
+
+    Parameters
+    ----------
+    grg : pygrgl GRG
+        The GRG used for phenotype simulation.
+
+    covariates : pandas.DataFrame or numpy.ndarray
+        Covariate matrix C.
+        - If DataFrame:
+            * Must have one row per individual.
+            * If it includes 'individual_id', merge is done by ID.
+            * Otherwise, row order must match sim_phenotypes output.
+        - If ndarray:
+            * Shape (n_individuals, n_covariates), row order matches phenotypes.
+
+    cov_effects : array-like
+        Coefficient vector α (length must equal number of covariates).
+
+    **sim_kwargs :
+        Keyword arguments passed directly to sim_phenotypes
+        (heritability, num_causal, normalize_phenotype, etc.).
+
+    Returns
+    -------
+    final_phenotypes : pandas.DataFrame
+        Same as sim_phenotypes output with two new columns:
+            - covariate_value
+            - phenotype (updated)
+    """
+
+    # 1. Run original phenotype simulation
+    phenos = sim_phenotypes(grg, **sim_kwargs)
+
+    # 2. Prepare covariate matrix
+    if isinstance(covariates, pd.DataFrame):
+        cov_df = covariates.copy()
+
+        if "individual_id" in cov_df.columns:
+            cov_cols = cov_df.columns.difference(["individual_id"])
+            cov_mat = cov_df[cov_cols].to_numpy()
+        else:
+            cov_cols = cov_df.columns
+            cov_mat = cov_df.to_numpy()
+            cov_df["individual_id"] = phenos["individual_id"].values
+
+    else:
+        cov_mat = np.asarray(covariates)
+        cov_cols = [f"cov_{j}" for j in range(cov_mat.shape[1])]
+        cov_df = pd.DataFrame(cov_mat, columns=cov_cols)
+        cov_df["individual_id"] = phenos["individual_id"].values
+
+    # 3. Validate cov_effects
+    cov_effects = np.asarray(cov_effects)
+    if cov_effects.shape[0] != cov_mat.shape[1]:
+        raise ValueError(
+            f"cov_effects length {cov_effects.shape[0]} does not match "
+            f"number of covariates {cov_mat.shape[1]}"
+        )
+
+    # 4. Compute Cα
+    cov_term = cov_mat @ cov_effects
+
+    cov_term_df = pd.DataFrame(
+        {"individual_id": cov_df["individual_id"].values, "covariate_value": cov_term}
+    )
+
+    # 5. Merge with phenotype DF
+    final_phenotypes = phenos.merge(cov_term_df, on="individual_id", how="left")
+
+    # 6. Update phenotype
+    final_phenotypes["phenotype"] = (
+        final_phenotypes["genetic_value"]
+        + final_phenotypes["covariate_value"]
+        + final_phenotypes["environmental_noise"]
+    )
+
+    return final_phenotypes
