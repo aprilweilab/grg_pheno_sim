@@ -473,7 +473,7 @@ def sim_binary_phenotypes_custom_stdOp(
         rng = np.random.default_rng(random_seed)
     else:
         rng = np.random.default_rng()
-             
+
     df["environmental_noise"] = rng.normal(0.0, np.sqrt(noise_var), size=len(df))
 
     T = stats.norm.ppf(1.0 - population_prevalence)
