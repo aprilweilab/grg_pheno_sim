@@ -55,7 +55,7 @@ def convert_to_phen(phenotypes_df, path, include_header=False):
 def sim_phenotypes(
     grg,
     model=grg_causal_mutation_model("normal", mean=0, var=1),
-    num_causal=1000,
+    num_causal=None,
     random_seed=42,
     normalize_phenotype=False,
     normalize_genetic_values_before_noise=False,
@@ -78,7 +78,7 @@ def sim_phenotypes(
     grg: The GRG on which phenotypes will be simulated.
     model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
     Default model used is the standard Gaussian.
-    num_causal: Number of causal sites simulated. Default value used is 1000.
+    num_causal: Number of causal sites simulated. Default value used is num_mutations.
     random_seed: The random seed used for causal mutation simulation. Default values is 42.
     normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
     normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
@@ -330,7 +330,7 @@ def allele_frequencies_new(grg: pygrgl.GRG) -> np.typing.NDArray:
 def sim_phenotypes_StdOp(
     grg,
     heritability,
-    num_causal=1000,
+    num_causal=None,
     random_seed=42,
     save_effect_output=False,
     effect_path=None,
@@ -349,7 +349,7 @@ def sim_phenotypes_StdOp(
     grg: The GRG on which phenotypes will be simulated.
     heritability: Narrow-sense heritability (h^2) used to set the effect-size variance
         and to scale the environmental noise (0 < h^2 <= 1).
-    num_causal: Number of causal sites to simulate. Default is 1000.
+    num_causal: Number of causal sites to simulate. Default is num_mutations.
     random_seed: Random seed used for causal effect simulation and environmental noise.
         Default is 42.
     normalize_genetic_values_before_noise: If True, normalize the per-individual genetic
