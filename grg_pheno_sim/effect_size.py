@@ -66,7 +66,7 @@ def sim_grg_causal_mutation(
         raise ValueError("Specify either num_causal or causal_sites, not both.")
     if causal_sites is None:
         if num_causal is None:
-            num_causal = 1
+            num_causal = grg.num_mutations
         num_sites = grg.num_mutations
         causal_sites = rng.choice(num_sites, size=num_causal, replace=False)
 
