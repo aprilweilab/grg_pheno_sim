@@ -1,6 +1,5 @@
 """
 This file simulates the phenotypes overall by combining the incremental stages of simulation on GRGs.
-=======
 """
 
 import pandas as pd
@@ -35,12 +34,10 @@ def convert_to_phen(phenotypes_df, path, include_header=False):
     """
     This function converts the phenotypes dataframe to a CSV file.
 
-    Parameters
-    ----------
-    phenotypes_df: The input pandas dataframe containing the phenotypes.
-    path: The path at which the CSV file will be saved.
-    include_header: A boolean parameter that indicates whether headers have to be included.
-    Default value is False.
+    :param phenotypes_df: The input pandas dataframe containing the phenotypes.
+    :param path: The path at which the CSV file will be saved.
+    :param include_header: A boolean parameter that indicates whether headers have to be
+        included. Default: False.
     """
     if path is None:
         raise ValueError("Output path must be defined")
@@ -73,38 +70,43 @@ def sim_phenotypes(
     """
     Function to simulate phenotypes in one go by combining all intermittent stages.
 
-    Parameters
-    ----------
-    grg: The GRG on which phenotypes will be simulated.
-    model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
-    Default model used is the standard Gaussian.
-    num_causal: Number of causal sites simulated. Default value used is num_mutations.
-    random_seed: The random seed used for causal mutation simulation. Default values is 42.
-    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
-    normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
-    user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
-    normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
-    save_effect_output: This boolean parameter decides whether the effect sizes
-    will be saved to a .par file using the standard output format. Default value is False.
-    effect_path: This parameter contains the path at which the .par output file will be saved.
-    Default value is None.
-    standardized_output: This boolean parameter decides whether the phenotypes
-    will be saved to a .phen file using the standard output format. Default value is False.
-    path: This parameter contains the path at which the .phen output file will be saved.
-    Default value is None.
-    header: This boolean parameter decides whether the .phen output file contains column
-    headers or not. Default value is False.
-    standardized: This boolean parameters decides whether the simulation uses standardized genotypes.
+    :param grg: The GRG on which phenotypes will be simulated.
+    :type grg: pygrgl.GRG
+    :param model: The distribution model from which effect sizes are drawn. Depends on the
+        user's discretion. Default model used is the standard Gaussian.
+    :param num_causal: Number of causal sites simulated. Default value used is num_mutations.
+    :param random_seed: The random seed used for causal mutation simulation. Default: 42.
+    :param normalize_phenotype: Checks whether to normalize the phenotypes. Default: False.
+    :param normalize_genetic_values_before_noise: Checks whether to normalize the genetic
+        values prior to simulating environmental noise (True if yes). Depends on the user's
+        discretion. Default: False.
+    :param heritability: Takes in the h2 features to simulate environmental noise (set to
+        None if the user prefers user-defined noise) and 1 is the user wants zero noise.
+    :param user_defined_noise_parameters: Parameters used for simulating environmental noise
+        taken in from the user.
+    :param normalize_genetic_values_after: In the case where the h2 feature is not used, this
+        checks whether the user wants genetic values normalized at the end (True if yes).
+        Default: False.
+    :param save_effect_output: This boolean parameter decides whether the effect sizes
+        will be saved to a .par file using the standard output format. Default: False.
+    :param effect_path: This parameter contains the path at which the .par output file will
+        be saved. Default: None.
+    :param standardized_output: This boolean parameter decides whether the phenotypes
+        will be saved to a .phen file using the standard output format. Default: False.
+    :param path: This parameter contains the path at which the .phen output file will be saved.
+        Default: None.
+    :param header: This boolean parameter decides whether the .phen output file contains column
+        headers or not. Default: False.
+    :param standardized: This boolean parameters decides whether the simulation uses standardized
+        genotypes.
 
-    Returns
-    --------------------
-    Pandas dataframe with resultant phenotypes. The dataframe contains the following:
-    `causal_mutation_id`
-    `individual_id`
-    `genetic_value`
-    `environmental_noise`
-    `phenotype`
+    :return: Pandas dataframe with resultant phenotypes. The dataframe contains the following:
+
+        * `causal_mutation_id`
+        * `individual_id`
+        * `genetic_value`
+        * `environmental_noise`
+        * `phenotype`
     """
 
     if standardized is True:
@@ -573,33 +575,27 @@ def add_covariates(
     Wrapper around sim_phenotypes that adds covariate effects:
         Y = genetic_value + covariate_value + environmental_noise
 
-    Parameters
-    ----------
-    grg : pygrgl GRG
-        The GRG used for phenotype simulation.
+    :param grg: The GRG used for phenotype simulation.
+    :type grg: pygrgl.GRG
+    :param covariates: Covariate matrix C.
 
-    covariates : pandas.DataFrame or numpy.ndarray
-        Covariate matrix C.
         - If DataFrame:
             * Must have one row per individual.
             * If it includes 'individual_id', merge is done by ID.
             * Otherwise, row order must match sim_phenotypes output.
         - If ndarray:
             * Shape (n_individuals, n_covariates), row order matches phenotypes.
-
-    cov_effects : array-like
-        Coefficient vector α (length must equal number of covariates).
-
-    **sim_kwargs :
-        Keyword arguments passed directly to sim_phenotypes
+    :type covariates: Union[pandas.DataFrame, numpy.ndarray]
+    :param cov_effects: Coefficient vector α (length must equal number of covariates).
+    :type cov_effects: numpy.typing.ArrayLike
+    :param sim_kwargs: Keyword arguments passed directly to sim_phenotypes
         (heritability, num_causal, normalize_phenotype, etc.).
 
-    Returns
-    -------
-    final_phenotypes : pandas.DataFrame
-        Same as sim_phenotypes output with two new columns:
-            - covariate_value
-            - phenotype (updated)
+    :return: Same as sim_phenotypes output with two new columns:
+
+        - covariate_value
+        - phenotype (updated)
+    :rtype: pandas.DataFrame
     """
 
     # 1. Run original phenotype simulation

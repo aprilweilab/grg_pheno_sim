@@ -47,49 +47,46 @@ def sim_binary_phenotypes(
     Since the function simulates binary phenotypes, we add a Gaussian threshold check
     at the very end to convert continuous values to binary values.
 
-    Parameters
-    ----------
-    grg: The GRG on which phenotypes will be simulated.
-    model: The distribution model from which effect sizes are drawn. Depends on the
-    user's discretion.
-    num_causal: Number of causal sites simulated.
-    population_prevalence: The prevalence of the condition in the general population.
-    0.1 means 1 in 10 individuals have the condition.
-    random_seed: The random seed used for causal mutation effect simulation.
-    normalize_genetic_values_before_noise: Checks whether to normalize the genetic
-    values prior to simulating environmental noise (True if yes). Depends on the
-    user's discretion. Set to False by default.
-    heritability: Takes in the h2 features to simulate environmental noise
-    (set to None if the user prefers user-defined noise) and 1 is the user wants
-    zero noise.
-    user_mean: Mean parameter used for simulating environmental
-    noise taken in from the user.
-    user_cov: Covariance parameter used for simulating environmental
-    noise taken in from the user.
-    normalize_genetic_values_after: In the case where the h2 feature is not used,
-    this checks whether the user wants genetic values normalized at the end (True
-    if yes). Set to False by default.
-    save_effect_output: This boolean parameter decides whether the effect sizes
-    will be saved to a .par file using the standard output format. Default value is False.
-    effect_path: This parameter contains the path at which the .par output file will be saved.
-    Default value is None.
-    standardized_output: This boolean parameter decides whether the phenotypes
-    will be saved to a .phen file using the standard output format. Default value is False.
-    path: This parameter contains the path at which the .phen output file will be saved.
-    Default value is None.
-    header: This boolean parameter decides whether the .phen output file contains column
-    headers or not. Default value is False.
-    standardized: This boolean parameters decides whether the simulation uses standardized genotypes.
+    :param grg: The GRG on which phenotypes will be simulated.
+    :type grg: pygrgl.GRG
+    :param model: The distribution model from which effect sizes are drawn. Depends on the
+        user's discretion.
+    :param num_causal: Number of causal sites simulated.
+    :param population_prevalence: The prevalence of the condition in the general population.
+        0.1 means 1 in 10 individuals have the condition.
+    :param random_seed: The random seed used for causal mutation effect simulation.
+    :param normalize_genetic_values_before_noise: Checks whether to normalize the genetic
+        values prior to simulating environmental noise (True if yes). Depends on the
+        user's discretion. Default: False.
+    :param heritability: Takes in the h2 features to simulate environmental noise
+        (set to None if the user prefers user-defined noise) and 1 is the user wants
+        zero noise.
+    :param user_mean: Mean parameter used for simulating environmental
+        noise taken in from the user.
+    :param user_cov: Covariance parameter used for simulating environmental
+        noise taken in from the user.
+    :param normalize_genetic_values_after: In the case where the h2 feature is not used,
+        this checks whether the user wants genetic values normalized at the end (True
+        if yes). Default: False.
+    :param save_effect_output: This boolean parameter decides whether the effect sizes
+        will be saved to a .par file using the standard output format. Default value is False.
+    :param effect_path: This parameter contains the path at which the .par output file will be saved.
+        Default: None.
+    :param standardized_output: This boolean parameter decides whether the phenotypes
+        will be saved to a .phen file using the standard output format. Default value is False.
+    :param path: This parameter contains the path at which the .phen output file will be saved.
+        Default: None.
+    :param header: This boolean parameter decides whether the .phen output file contains column
+        headers or not. Default: False.
+    :param standardized: This boolean parameters decides whether the simulation uses standardized genotypes.
 
+    :return: Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
 
-    Returns
-    --------------------
-    Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
-    `causal_mutation_id`
-    `individual_id`
-    `genetic_value`
-    `environmental_noise`
-    `phenotype`
+        * `causal_mutation_id`
+        * `individual_id`
+        * `genetic_value`
+        * `environmental_noise`
+        * `phenotype`
     """
     if standardized:
         return sim_binary_phenotypes_standOp(
@@ -189,42 +186,40 @@ def sim_binary_phenotypes_custom(
     Since the function simulates binary phenotypes, we add a Gaussian threshold check
     at the very end to convert continuous values to binary values.
 
-    Parameters
-    ----------
-    grg: The GRG on which phenotypes will be simulated.
-    input_effects: The custom effect sizes dataset.
-    population_prevalence: The prevalence of the condition in the general population.
-    0.1 means 1 in 10 individuals have the condition.
-    normalize_genetic_values_before_noise: Checks whether to normalize the genetic
-    values prior to simulating environmental noise (True if yes). Depends on the
-    user's discretion. Set to False by default.
-    heritability: Takes in the h2 features to simulate environmental noise
-    (set to None if the user prefers user-defined noise) and 1 is the user wants
-    zero noise.
-    user_defined_noise_parameters: Parameters used for simulating environmental
-    noise taken in from the user.
-    normalize_genetic_values_after: In the case where the h2 feature is not used,
-    this checks whether the user wants genetic values normalized at the end (True
-    if yes). Set to False by default.
-    save_effect_output: This boolean parameter decides whether the effect sizes
-    will be saved to a .par file using the standard output format. Default value is False.
-    effect_path: This parameter contains the path at which the .par output file
-    will be saved. Default value is None.
-    standardized_output: This boolean parameter decides whether the phenotypes
-    will be saved to a .phen file using the standard output format. Default value is False.
-    path: This parameter contains the path at which the .phen output file will be saved.
-    Default value is None.
-    header: This boolean parameter decides whether the .phen output file contains column
-    headers or not. Default value is False.
+    :param grg: The GRG on which phenotypes will be simulated.
+    :type grg: pygrgl.GRG
+    :param input_effects: The custom effect sizes dataset.
+    :param population_prevalence: The prevalence of the condition in the general population.
+        0.1 means 1 in 10 individuals have the condition.
+    :param normalize_genetic_values_before_noise: Checks whether to normalize the genetic
+        values prior to simulating environmental noise (True if yes). Depends on the
+        user's discretion. Default: False.
+    :param heritability: Takes in the h2 features to simulate environmental noise
+        (set to None if the user prefers user-defined noise) and 1 is the user wants
+        zero noise.
+    :param user_defined_noise_parameters: Parameters used for simulating environmental
+        noise taken in from the user.
+    :param normalize_genetic_values_after: In the case where the h2 feature is not used,
+        this checks whether the user wants genetic values normalized at the end (True
+        if yes). Default: False.
+    :param save_effect_output: This boolean parameter decides whether the effect sizes
+        will be saved to a .par file using the standard output format. Default: False.
+    :param effect_path: This parameter contains the path at which the .par output file
+        will be saved. Default: None.
+    :param standardized_output: This boolean parameter decides whether the phenotypes
+        will be saved to a .phen file using the standard output format. Default: False.
+    :param path: This parameter contains the path at which the .phen output file will be saved.
+        Default: None.
+    :param header: This boolean parameter decides whether the .phen output file contains column
+        headers or not. Default: False.
 
-    Returns
-    --------------------
-    Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
-    `causal_mutation_id`
-    `individual_id`
-    `genetic_value`
-    `environmental_noise`
-    `phenotype`
+    :return: Pandas dataframe with resultant binary phenotypes. The dataframe contains the following:
+
+        * `causal_mutation_id`
+        * `individual_id`
+        * `genetic_value`
+        * `environmental_noise`
+        * `phenotype`
     """
     if standardized:
         return sim_binary_phenotypes_custom_stdOp(

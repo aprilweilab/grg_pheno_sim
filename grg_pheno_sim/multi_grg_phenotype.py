@@ -1,6 +1,5 @@
 """
-This file simulates phenotypes on multiple GRGs by using the usual simulation methods.
-=======
+This module simulates phenotypes on multiple GRGs by using the usual simulation methods.
 """
 
 import numpy as np
@@ -75,27 +74,32 @@ def sim_phenotypes_multi_grg_ram(
     """
     Simulate phenotypes by loading all GRGs into RAM simultaneously.
 
-    Parameters
-    ----------
-    grg_files : List of paths to GRG files to be processed.
-    model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
-    num_causal_per_file: Number of causal sites simulated for each file (same for each GRG).
-    random_seed: The random seed used for causal mutation simulation.
-    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
-    normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
-    user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
-    normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
-    save_effect_output: This boolean parameter decides whether the effect sizes
-    will be saved to a .par file using the standard output format. Default value is False.
-    effect_path: This parameter contains the path at which the .par output file will be saved.
-    Default value is None.
-    standardized_output: This boolean parameter decides whether the phenotypes
-    will be saved to a .phen file using the standard output format. Default value is False.
-    path: This parameter contains the path at which the .phen output file will be saved.
-    Default value is None.
-    header: This boolean parameter decides whether the .phen output file contains column
-    headers or not. Default value is False.
+    :param grg_files: List of paths to GRG files to be processed.
+    :type grg_files: List[str]
+    :param model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
+    :param num_causal_per_file: Number of causal sites simulated for each file (same for each GRG).
+    :param random_seed: The random seed used for causal mutation simulation.
+    :param normalize_phenotype: Checks whether to normalize the phenotypes. Default: False.
+    :param normalize_genetic_values_before_noise: Checks whether to normalize the genetic values
+        prior to simulating environmental noise (True if yes). Depends on the user's discretion.
+        Default: False.
+    :param heritability: Takes in the h2 features to simulate environmental noise (set to None
+        if the user prefers user-defined noise) and 1 is the user wants zero noise.
+    :param user_defined_noise_parameters: Parameters used for simulating environmental noise
+        taken in from the user.
+    :param normalize_genetic_values_after: In the case where the h2 feature is not used, this
+        checks whether the user wants genetic values normalized at the end (True if yes).
+        Default: False.
+    :param save_effect_output: This boolean parameter decides whether the effect sizes
+        will be saved to a .par file using the standard output format. Default: False.
+    :param effect_path: This parameter contains the path at which the .par output file will be saved.
+        Default: None.
+    :param standardized_output: This boolean parameter decides whether the phenotypes
+        will be saved to a .phen file using the standard output format. Default: False.
+    :param path: This parameter contains the path at which the .phen output file will be saved.
+        Default: None.
+    :param header: This boolean parameter decides whether the .phen output file contains column
+        headers or not. Default value is False.
     """
     # Load all GRGs
     all_grgs = []
@@ -203,27 +207,32 @@ def sim_phenotypes_multi_grg_sequential(
     """
     Simulate phenotypes by processing GRGs sequentially to reduce memory usage.
 
-    Parameters
-    ----------
-    grg_files : List of paths to GRG files to be processed
-    model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
-    num_causal_per_file: Number of causal sites simulated for each file (same for each GRG).
-    random_seed: The random seed used for causal mutation simulation.
-    normalize_phenotype: Checks whether to normalize the phenotypes. The default value is False.
-    normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior to simulating environmental noise (True if yes). Depends on the user's discretion. Set to False by default.
-    heritability: Takes in the h2 features to simulate environmental noise (set to None if the user prefers user-defined noise) and 1 is the user wants zero noise.
-    user_defined_noise_parameters: Parameters used for simulating environmental noise taken in from the user.
-    normalize_genetic_values_after: In the case where the h2 feature is not used, this checks whether the user wants genetic values normalized at the end (True if yes). Set to False by default.
-    save_effect_output: This boolean parameter decides whether the effect sizes
-    will be saved to a .par file using the standard output format. Default value is False.
-    effect_path: This parameter contains the path at which the .par output file will be saved.
-    Default value is None.
-    standardized_output: This boolean parameter decides whether the phenotypes
-    will be saved to a .phen file using the standard output format. Default value is False.
-    path: This parameter contains the path at which the .phen output file will be saved.
-    Default value is None.
-    header: This boolean parameter decides whether the .phen output file contains column
-    headers or not. Default value is False.
+    :param grg_files: List of paths to GRG files to be processed
+    :type grg_files: List[str]
+    :param model: The distribution model from which effect sizes are drawn. Depends on the user's discretion.
+    :param num_causal_per_file: Number of causal sites simulated for each file (same for each GRG).
+    :param random_seed: The random seed used for causal mutation simulation.
+    :param normalize_phenotype: Checks whether to normalize the phenotypes. Default: False.
+    :param normalize_genetic_values_before_noise: Checks whether to normalize the genetic values prior
+        to simulating environmental noise (True if yes). Depends on the user's discretion.
+        Default: False.
+    :param heritability: Takes in the h2 features to simulate environmental noise (set to None if
+        the user prefers user-defined noise) and 1 is the user wants zero noise.
+    :param user_defined_noise_parameters: Parameters used for simulating environmental noise taken
+        in from the user.
+    :param normalize_genetic_values_after: In the case where the h2 feature is not used, this
+        checks whether the user wants genetic values normalized at the end (True if yes).
+        Default: False.
+    :param save_effect_output: This boolean parameter decides whether the effect sizes
+        will be saved to a .par file using the standard output format. Default value is False.
+    :param effect_path: This parameter contains the path at which the .par output file will be
+        saved. Default: None.
+    :param standardized_output: This boolean parameter decides whether the phenotypes
+        will be saved to a .phen file using the standard output format. Default: False.
+    :param path: This parameter contains the path at which the .phen output file will be saved.
+        Default: None.
+    :param header: This boolean parameter decides whether the .phen output file contains column
+        headers or not. Default: False.
     """
 
     all_genetic_values = []
