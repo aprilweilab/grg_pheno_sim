@@ -17,7 +17,12 @@ from grg_pheno_sim.effect_size import (
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
-from grg_pheno_sim.phenotype import convert_to_phen, phenotype_class_to_df
+from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
+from grg_pheno_sim.phenotype import (
+    allele_frequencies_new,
+    convert_to_phen,
+    phenotype_class_to_df,
+)
 
 
 def intermediate_genetic_vals(
@@ -28,6 +33,7 @@ def intermediate_genetic_vals(
     normalize_genetic_values_before_noise,
     grg_name,
     effect_path,
+    standardized
 ):
     """
     Intermediate function to simulate effect sizes and compute genetic values
@@ -40,9 +46,39 @@ def intermediate_genetic_vals(
     if effect_path is not None:
         convert_to_effect_output(causal_mutation_df, grg, effect_path)
 
-    genetic_values = additive_effect_sizes(grg, causal_mutation_df)
+    ###This also allows for multivariate causal mutations
+    if standardized:
+        freqs = allele_frequencies_new(grg)
+        causal_ids = np.sort(causal_mutation_df["causal_mutation_id"].unique())
+        beta = np.zeros((grg.num_mutations, len(causal_ids)), dtype=float)
 
-    individual_genetic_values = samples_to_individuals(genetic_values)
+        for beta_col, causal_id in enumerate(causal_ids):
+            causal_subset = causal_mutation_df[
+                causal_mutation_df["causal_mutation_id"] == causal_id
+            ]
+            mutation_ids = causal_subset["mutation_id"].astype(int).to_numpy()
+            beta[mutation_ids, beta_col] = causal_subset["effect_size"].to_numpy()
+
+        gv = _SciPyStdXOperator(
+            grg,
+            direction=pygrgl.TraversalDirection.UP,
+            freqs=freqs,
+            haploid=False,
+        )._matmat(beta)
+
+        if gv.ndim == 1:
+            gv = gv.reshape(-1, 1)
+
+        individual_genetic_values = pd.DataFrame(
+            {
+                "individual_id": np.repeat(np.arange(grg.num_individuals), len(causal_ids)),
+                "genetic_value": gv.reshape(-1),
+                "causal_mutation_id": np.tile(causal_ids, grg.num_individuals),
+            }
+        )
+    else:
+        genetic_values = additive_effect_sizes(grg, causal_mutation_df)
+        individual_genetic_values = samples_to_individuals(genetic_values)
 
     if normalize_genetic_values_before_noise == True:
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
@@ -70,6 +106,7 @@ def sim_phenotypes_multi_grg_ram(
     standardized_output,
     path,
     header,
+    standardized
 ):
     """
     Simulate phenotypes by loading all GRGs into RAM simultaneously.
@@ -100,6 +137,8 @@ def sim_phenotypes_multi_grg_ram(
         Default: None.
     :param header: This boolean parameter decides whether the .phen output file contains column
         headers or not. Default value is False.
+    :param standardized: This boolean parameters decides whether the simulation uses standardized
+        genotypes.
     """
     # Load all GRGs
     all_grgs = []
@@ -127,6 +166,7 @@ def sim_phenotypes_multi_grg_ram(
             normalize_genetic_values_before_noise,
             grg_name,
             effect_path=path,
+            standardized=standardized
         )
         all_genetic_values.append(genetic_val_df)
         index += 1
@@ -203,6 +243,7 @@ def sim_phenotypes_multi_grg_sequential(
     standardized_output,
     path,
     header,
+    standardized
 ):
     """
     Simulate phenotypes by processing GRGs sequentially to reduce memory usage.
@@ -233,6 +274,8 @@ def sim_phenotypes_multi_grg_sequential(
         Default: None.
     :param header: This boolean parameter decides whether the .phen output file contains column
         headers or not. Default: False.
+    :param standardized: This boolean parameters decides whether the simulation uses standardized
+        genotypes.
     """
 
     all_genetic_values = []
@@ -256,6 +299,7 @@ def sim_phenotypes_multi_grg_sequential(
             normalize_genetic_values_before_noise,
             grg_file,
             effect_path=path,
+            standardized=standardized
         )
         all_genetic_values.append(genetic_val_df)
 
@@ -335,6 +379,7 @@ def sim_phenotypes_multi_grg(
     standardized_output=False,
     path=None,
     header=False,
+    standardized=False,
 ):
     """
     Simulate phenotypes across multiple GRG files with two loading strategies.
@@ -372,6 +417,8 @@ def sim_phenotypes_multi_grg(
     Default value is None.
     header: This boolean parameter decides whether the .phen output file contains column
     headers or not. Default value is False.
+    standardized: This boolean parameters decides whether the simulation uses standardized
+    genotypes.
 
     Returns
     --------------------
@@ -410,6 +457,7 @@ def sim_phenotypes_multi_grg(
             standardized_output,
             path,
             header,
+            standardized,
         )
     else:
         # Strategy 2: Process GRGs sequentially
@@ -430,4 +478,5 @@ def sim_phenotypes_multi_grg(
             standardized_output,
             path,
             header,
+            standardized,
         )
