@@ -35,7 +35,6 @@ class GrgPhenotype:
             causal_mutation_id = phen["causal_mutation_id"].unique()
 
             if len(causal_mutation_id) == 1:
-
                 genetic_var = phen["genetic_value"].var()
                 noise_var = phen["environmental_noise"].var()
                 phenotype_var = phen["phenotype"].var()
@@ -220,7 +219,6 @@ def sim_env_noise(
     )
 
     if len(causal_mutation_id) == 1:
-
         if user_defined == True:
             phenotype_df = simulator.sim_environment_univariate(
                 tailored=user_defined, user_mean=mean, user_std=std

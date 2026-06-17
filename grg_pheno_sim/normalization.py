@@ -36,7 +36,6 @@ def normalize_individual_phenotypes(
     old_noise_mean = phenotype_df["environmental_noise"].mean()
 
     if (h2_curr != 1 and user_noise == False) or user_noise == True:
-
         # scale both genetic and noise by subtracting E[g], E[noise] and divide by phenotype std in both cases
         phenotype_df["genetic_value"] = (
             phenotype_df["genetic_value"] - old_genetic_mean

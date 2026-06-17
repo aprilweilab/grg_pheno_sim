@@ -330,7 +330,6 @@ def samples_to_individuals(additive_causal_mutation_df):
     if (
         additive_causal_mutation_df["causal_mutation_id"].sum() == 0
     ):  # base case for univariate causal mutation
-
         individuals = singular_samples_to_individuals(additive_causal_mutation_df)
 
         return individuals
