@@ -231,11 +231,11 @@ def quantile_normalize(phenotype_df, phenotype_normalize=True, normalize_both=Fa
 
         quantile_normalized_phenotype_df.reset_index(drop=True, inplace=True)
 
-        quantile_normalized_phenotype_df[
-            "individual_id"
-        ] = quantile_normalized_phenotype_df["individual_id"].astype(int)
-        quantile_normalized_phenotype_df[
-            "causal_mutation_id"
-        ] = quantile_normalized_phenotype_df["causal_mutation_id"].astype(int)
+        quantile_normalized_phenotype_df["individual_id"] = (
+            quantile_normalized_phenotype_df["individual_id"].astype(int)
+        )
+        quantile_normalized_phenotype_df["causal_mutation_id"] = (
+            quantile_normalized_phenotype_df["causal_mutation_id"].astype(int)
+        )
 
         return quantile_normalized_phenotype_df
