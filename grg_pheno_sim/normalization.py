@@ -36,7 +36,6 @@ def normalize_individual_phenotypes(
     old_noise_mean = phenotype_df["environmental_noise"].mean()
 
     if (h2_curr != 1 and user_noise == False) or user_noise == True:
-
         # scale both genetic and noise by subtracting E[g], E[noise] and divide by phenotype std in both cases
         phenotype_df["genetic_value"] = (
             phenotype_df["genetic_value"] - old_genetic_mean
@@ -232,11 +231,11 @@ def quantile_normalize(phenotype_df, phenotype_normalize=True, normalize_both=Fa
 
         quantile_normalized_phenotype_df.reset_index(drop=True, inplace=True)
 
-        quantile_normalized_phenotype_df["individual_id"] = (
-            quantile_normalized_phenotype_df["individual_id"].astype(int)
-        )
-        quantile_normalized_phenotype_df["causal_mutation_id"] = (
-            quantile_normalized_phenotype_df["causal_mutation_id"].astype(int)
-        )
+        quantile_normalized_phenotype_df[
+            "individual_id"
+        ] = quantile_normalized_phenotype_df["individual_id"].astype(int)
+        quantile_normalized_phenotype_df[
+            "causal_mutation_id"
+        ] = quantile_normalized_phenotype_df["causal_mutation_id"].astype(int)
 
         return quantile_normalized_phenotype_df

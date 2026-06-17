@@ -33,7 +33,7 @@ def intermediate_genetic_vals(
     normalize_genetic_values_before_noise,
     grg_name,
     effect_path,
-    standardized
+    standardized,
 ):
     """
     Intermediate function to simulate effect sizes and compute genetic values
@@ -71,7 +71,9 @@ def intermediate_genetic_vals(
 
         individual_genetic_values = pd.DataFrame(
             {
-                "individual_id": np.repeat(np.arange(grg.num_individuals), len(causal_ids)),
+                "individual_id": np.repeat(
+                    np.arange(grg.num_individuals), len(causal_ids)
+                ),
                 "genetic_value": gv.reshape(-1),
                 "causal_mutation_id": np.tile(causal_ids, grg.num_individuals),
             }
@@ -106,7 +108,7 @@ def sim_phenotypes_multi_grg_ram(
     standardized_output,
     path,
     header,
-    standardized
+    standardized,
 ):
     """
     Simulate phenotypes by loading all GRGs into RAM simultaneously.
@@ -151,7 +153,6 @@ def sim_phenotypes_multi_grg_ram(
     all_genetic_values = []
     index = 0
     for grg in all_grgs:
-
         if save_effect_output:
             path = effect_path_list[index]
         else:
@@ -166,7 +167,7 @@ def sim_phenotypes_multi_grg_ram(
             normalize_genetic_values_before_noise,
             grg_name,
             effect_path=path,
-            standardized=standardized
+            standardized=standardized,
         )
         all_genetic_values.append(genetic_val_df)
         index += 1
@@ -243,7 +244,7 @@ def sim_phenotypes_multi_grg_sequential(
     standardized_output,
     path,
     header,
-    standardized
+    standardized,
 ):
     """
     Simulate phenotypes by processing GRGs sequentially to reduce memory usage.
@@ -299,7 +300,7 @@ def sim_phenotypes_multi_grg_sequential(
             normalize_genetic_values_before_noise,
             grg_file,
             effect_path=path,
-            standardized=standardized
+            standardized=standardized,
         )
         all_genetic_values.append(genetic_val_df)
 

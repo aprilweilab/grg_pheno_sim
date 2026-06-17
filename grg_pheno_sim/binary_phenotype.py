@@ -299,7 +299,6 @@ def sim_binary_phenotypes_custom(
     final_phenotypes["phenotype"] = binary_phen
 
     if standardized_output == True:
-
         convert_to_phen(final_phenotypes, path, include_header=header)
 
     return final_phenotypes

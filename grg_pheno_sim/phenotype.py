@@ -306,7 +306,6 @@ def sim_phenotypes_custom(
             final_phenotypes = phenotype_class_to_df(phenotypes)
 
     if standardized_output == True:
-
         convert_to_phen(final_phenotypes, path, include_header=header)
 
     return final_phenotypes
