@@ -189,7 +189,9 @@ def sim_phenotypes_multi_grg_ram(
     check = len(causal_mutation_id) == 1
 
     if heritability is not None:
-        phenotypes = sim_env_noise(combined_genetic_df, h2=heritability)
+        phenotypes = sim_env_noise(
+            combined_genetic_df, h2=heritability, random_seed=random_seed
+        )
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -198,11 +200,19 @@ def sim_phenotypes_multi_grg_ram(
     else:
         if check:
             phenotypes = sim_env_noise(
-                combined_genetic_df, user_defined=True, mean=user_mean, std=user_cov
+                combined_genetic_df,
+                user_defined=True,
+                mean=user_mean,
+                std=user_cov,
+                random_seed=random_seed,
             )
         else:
             phenotypes = sim_env_noise(
-                combined_genetic_df, user_defined=True, means=user_mean, cov=user_cov
+                combined_genetic_df,
+                user_defined=True,
+                means=user_mean,
+                cov=user_cov,
+                random_seed=random_seed,
             )
 
         if normalize_phenotype:
@@ -323,7 +333,9 @@ def sim_phenotypes_multi_grg_sequential(
     check = len(causal_mutation_id) == 1
 
     if heritability is not None:
-        phenotypes = sim_env_noise(combined_genetic_df, h2=heritability)
+        phenotypes = sim_env_noise(
+            combined_genetic_df, h2=heritability, random_seed=random_seed
+        )
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -332,11 +344,19 @@ def sim_phenotypes_multi_grg_sequential(
     else:
         if check:
             phenotypes = sim_env_noise(
-                combined_genetic_df, user_defined=True, mean=user_mean, std=user_cov
+                combined_genetic_df,
+                user_defined=True,
+                mean=user_mean,
+                std=user_cov,
+                random_seed=random_seed,
             )
         else:
             phenotypes = sim_env_noise(
-                combined_genetic_df, user_defined=True, means=user_mean, cov=user_cov
+                combined_genetic_df,
+                user_defined=True,
+                means=user_mean,
+                cov=user_cov,
+                random_seed=random_seed,
             )
 
         if normalize_phenotype:

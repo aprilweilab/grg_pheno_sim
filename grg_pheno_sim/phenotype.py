@@ -145,7 +145,9 @@ def sim_phenotypes(
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
     if heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
+        phenotypes = sim_env_noise(
+            individual_genetic_values, h2=heritability, random_seed=random_seed
+        )
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -158,6 +160,7 @@ def sim_phenotypes(
                 user_defined=True,
                 mean=user_mean,
                 std=user_cov,
+                random_seed=random_seed,
             )
         else:
             phenotypes = sim_env_noise(
@@ -165,6 +168,7 @@ def sim_phenotypes(
                 user_defined=True,
                 means=user_mean,
                 cov=user_cov,
+                random_seed=random_seed,
             )
 
         if normalize_phenotype:
@@ -276,7 +280,9 @@ def sim_phenotypes_custom(
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
     if heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
+        phenotypes = sim_env_noise(
+            individual_genetic_values, h2=heritability, random_seed=random_seed
+        )
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -289,6 +295,7 @@ def sim_phenotypes_custom(
                 user_defined=True,
                 mean=user_mean,
                 std=user_cov,
+                random_seed=random_seed,
             )
         else:
             phenotypes = sim_env_noise(
@@ -296,6 +303,7 @@ def sim_phenotypes_custom(
                 user_defined=True,
                 means=user_mean,
                 cov=user_cov,
+                random_seed=random_seed,
             )
 
         if normalize_phenotype:
