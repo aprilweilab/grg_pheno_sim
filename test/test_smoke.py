@@ -1,14 +1,13 @@
-from grg_pheno_sim.phenotype import sim_phenotypes, convert_to_phen
-import numpy
 import os
 import pandas
 import pygrgl
 import sys
 import unittest
+from grg_pheno_sim.phenotype import sim_phenotypes
 
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(THIS_DIR)
-from testing_utils import construct_grg, make_grg_sparse_mat
+from testing_utils import construct_grg
 
 CLEANUP = True
 INPUT_DIR = os.path.join(THIS_DIR, "input")

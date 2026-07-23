@@ -16,7 +16,6 @@ from grg_pheno_sim.effect_size import (
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
-from grg_pheno_sim.effect_size import allele_frequencies
 from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
 
 
