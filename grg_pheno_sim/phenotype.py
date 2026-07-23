@@ -16,7 +16,6 @@ from grg_pheno_sim.effect_size import (
 from grg_pheno_sim.noise_sim import sim_env_noise
 from grg_pheno_sim.model import grg_causal_mutation_model
 from grg_pheno_sim.normalization import normalize
-from grg_pheno_sim.effect_size import allele_frequencies
 from grg_pheno_sim.ops_scipy import SciPyStdXOperator as _SciPyStdXOperator
 
 
@@ -145,7 +144,9 @@ def sim_phenotypes(
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
     if heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
+        phenotypes = sim_env_noise(
+            individual_genetic_values, h2=heritability, random_seed=random_seed
+        )
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -158,6 +159,7 @@ def sim_phenotypes(
                 user_defined=True,
                 mean=user_mean,
                 std=user_cov,
+                random_seed=random_seed,
             )
         else:
             phenotypes = sim_env_noise(
@@ -165,6 +167,7 @@ def sim_phenotypes(
                 user_defined=True,
                 means=user_mean,
                 cov=user_cov,
+                random_seed=random_seed,
             )
 
         if normalize_phenotype:
@@ -276,7 +279,9 @@ def sim_phenotypes_custom(
         individual_genetic_values = normalize_genetic_values(individual_genetic_values)
 
     if heritability is not None:
-        phenotypes = sim_env_noise(individual_genetic_values, h2=heritability)
+        phenotypes = sim_env_noise(
+            individual_genetic_values, h2=heritability, random_seed=random_seed
+        )
         if normalize_phenotype:
             final_phenotypes = normalize(phenotypes)
         else:
@@ -289,6 +294,7 @@ def sim_phenotypes_custom(
                 user_defined=True,
                 mean=user_mean,
                 std=user_cov,
+                random_seed=random_seed,
             )
         else:
             phenotypes = sim_env_noise(
@@ -296,6 +302,7 @@ def sim_phenotypes_custom(
                 user_defined=True,
                 means=user_mean,
                 cov=user_cov,
+                random_seed=random_seed,
             )
 
         if normalize_phenotype:
